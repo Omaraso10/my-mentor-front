@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'https://backend-my-mentor-aa86716930d0.herokuapp.com';
+const API_URL = `${import.meta.env.VITE_API_URL}`
 
 const api = axios.create({
   baseURL: API_URL,
