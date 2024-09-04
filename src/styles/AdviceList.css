@@ -1,0 +1,74 @@
+.advice-list {
+  width: 250px;
+  height: 100vh;
+  overflow-y: auto;
+  background-color: #f0f0f0;
+  padding: 20px;
+  border-right: 1px solid #ddd;
+}
+
+.advice-list h2 {
+  margin-bottom: 20px;
+  font-size: 18px;
+  color: #333;
+}
+
+.advice-list ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.advice-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  margin-bottom: 10px;
+  background-color: #fff;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.advice-list li:hover {
+  background-color: #e0e0e0;
+}
+
+.advice-list li.selected {
+  background-color: #007bff;
+  color: white;
+}
+
+.advice-list li span {
+  flex-grow: 1;
+  margin-right: 10px;
+}
+
+.delete-button {
+  background-color: transparent;
+  color: #ff4d4d;
+  border: none;
+  width: 24px;
+  height: 24px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: color 0.3s ease;
+}
+
+.delete-button:hover {
+  color: #ff1a1a;
+}
+
+/* Opcional: si quieres que el botón de eliminar solo aparezca al pasar el ratón sobre el elemento */
+.advice-list li .delete-button {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.advice-list li:hover .delete-button {
+  opacity: 1;
+}
