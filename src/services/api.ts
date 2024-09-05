@@ -1,12 +1,17 @@
-import axios from 'axios';
+import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 
 const API_URL = `${import.meta.env.VITE_API_URL}`
+
+interface ExtendedAxiosRequestConfig extends InternalAxiosRequestConfig {
+  _retry?: boolean;
+}
 
 const api = axios.create({
   baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json',
   },
+  timeout: 30000, 
 });
 
 api.interceptors.request.use((config) => {
@@ -16,6 +21,37 @@ api.interceptors.request.use((config) => {
   }
   return config;
 });
+
+api.interceptors.response.use(
+  (response) => response,
+  async (error: AxiosError) => {
+    const originalRequest = error.config as ExtendedAxiosRequestConfig;
+
+    const handleLogout = () => {
+      localStorage.removeItem('token');
+      localStorage.removeItem('userEmail');
+      window.location.href = '/login';
+    };
+
+    if (error.response) {
+      if (error.response.status === 401 && !originalRequest._retry) {
+        originalRequest._retry = true;
+        handleLogout();
+        return Promise.reject(new Error('Sesión expirada. Por favor, inicie sesión nuevamente.'));
+      }
+    } else if (error.request) {
+      console.error('No se recibió respuesta del servidor:', error.request);
+      handleLogout();
+      return Promise.reject(new Error('No se pudo establecer conexión con el servidor. Por favor, intente más tarde.'));
+    } else {
+      console.error('Error en la configuración de la solicitud:', error.message);
+      handleLogout();
+      return Promise.reject(new Error('Ocurrió un error al procesar su solicitud. Por favor, intente más tarde.'));
+    }
+
+    return Promise.reject(error);
+  }
+);
 
 export interface AdviceRequest {
   user_professional_id: number;
@@ -74,6 +110,55 @@ export interface User {
   asesores: Asesor[];
 }
 
+export interface CreateUserRequest {
+  name: string;
+  last_name: string;
+  password: string;
+  phone_number: number;
+  email: string;
+  admin: boolean;
+  enabled: boolean;
+}
+
+export interface CreateUserResponse {
+  usuario: User;
+  mensaje: string;
+}
+
+export interface UsersResponse {
+  mensaje: string;
+  usuarios: User[];
+}
+
+export const getUsers = async (): Promise<UsersResponse> => {
+  try {
+    const response = await api.get<UsersResponse>('/users');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    throw error;
+  }
+};
+
+export const createUser = async (userData: CreateUserRequest): Promise<CreateUserResponse> => {
+  try {
+    const response = await api.post<CreateUserResponse>('/users', userData);
+    return response.data;
+  } catch (error) {
+    console.error('Error creating user:', error);
+    throw error;
+  }
+};
+
+export const deleteUser = async (uuid: string): Promise<void> => {
+  try {
+    await api.delete(`/users/${uuid}`);
+  } catch (error) {
+    console.error('Error deleting user:', error);
+    throw error;
+  }
+};
+
 export const getUserByEmail = async (email: string): Promise<UserResponse> => {
   try {
     const response = await api.get<UserResponse>(`/users/email/${email}`);
@@ -84,11 +169,12 @@ export const getUserByEmail = async (email: string): Promise<UserResponse> => {
   }
 };
 
-export const createAdvice = async (user_professional_id: number, ask: string): Promise<AdviceResponse> => {
+export const createAdvice = async (user_professional_id: number, ask: string, api_type: string): Promise<AdviceResponse> => {
   try {
     const response = await api.post<AdviceResponse>('/gpt/professional/advice', {
       user_professional_id,
-      ask
+      ask,
+      api_type
     });
     return response.data;
   } catch (error) {
@@ -97,11 +183,12 @@ export const createAdvice = async (user_professional_id: number, ask: string): P
   }
 };
 
-export const updateAdvice = async (id: number, user_professional_id: number, ask: string): Promise<AdviceResponse> => {
+export const updateAdvice = async (id: number, user_professional_id: number, ask: string, api_type: string): Promise<AdviceResponse> => {
   try {
     const response = await api.put<AdviceResponse>(`/gpt/professional/advice/${id}`, {
       user_professional_id,
-      ask
+      ask,
+      api_type
     });
     return response.data;
   } catch (error) {

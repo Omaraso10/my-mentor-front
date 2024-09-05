@@ -14,6 +14,7 @@ const Chat: React.FC<ChatProps> = ({ selectedAdvice, onNewAdvice }) => {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [apiType, setApiType] = useState<string>('openai');
   const { getGeneralAsesorId } = useAuth();
 
   useEffect(() => {
@@ -52,10 +53,10 @@ const Chat: React.FC<ChatProps> = ({ selectedAdvice, onNewAdvice }) => {
       let response: AdviceResponse;
 
       if (!selectedAdvice) {
-        response = await createAdvice(asesorId, input);
+        response = await createAdvice(asesorId, input, apiType);
         onNewAdvice(response.advice);
       } else {
-        response = await updateAdvice(selectedAdvice.id, asesorId, input);
+        response = await updateAdvice(selectedAdvice.id, asesorId, input, apiType);
       }
 
       // Actualizar los mensajes con los detalles más recientes
@@ -99,6 +100,14 @@ const Chat: React.FC<ChatProps> = ({ selectedAdvice, onNewAdvice }) => {
           placeholder={selectedAdvice ? "Escribe tu mensaje..." : "Escribe para iniciar una nueva asesoría..."}
           disabled={isLoading}
         />
+        <select
+          value={apiType}
+          onChange={(e) => setApiType(e.target.value)}
+          disabled={isLoading}
+        >
+          <option value="openai">OpenAI</option>
+          <option value="anthropic">Anthropic</option>
+        </select>
         <button type="submit" disabled={isLoading}>
           {isLoading ? 'Enviando...' : 'Enviar'}
         </button>

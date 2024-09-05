@@ -20,10 +20,12 @@ const Header: React.FC = () => {
       <nav>
         <ul>
           <li><Link to="/">Inicio</Link></li>
-          {isAuthenticated ? (
+          {isAuthenticated && (
             <>
               <li><Link to="/chat">Chat</Link></li>
-              <li><Link to="/profile">Perfil</Link></li>
+              {user?.admin && (
+                <li><Link to="/users">Usuarios</Link></li>
+              )}
               <li>
                 <button onClick={handleLogout} className="logout-button">
                   Cerrar Sesión
@@ -33,7 +35,8 @@ const Header: React.FC = () => {
                 Hola, {user?.name}
               </li>
             </>
-          ) : (
+          )}
+          {!isAuthenticated && (
             <li><Link to="/login">Iniciar Sesión</Link></li>
           )}
         </ul>

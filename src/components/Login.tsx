@@ -41,7 +41,17 @@ const Login: React.FC = () => {
         navigate('/chat');
       } catch (error) {
         console.error('Login failed:', error);
-        setLoginError('Email o contraseña incorrectos. Por favor, inténtalo de nuevo.');
+        if (error instanceof Error) {
+          if (error.message.includes('No se pudo establecer conexión con el servidor')) {
+            setLoginError('No se pudo conectar con el servidor. Por favor, verifique su conexión a internet e intente nuevamente.');
+          } else if (error.message.includes('Sesión expirada')) {
+            setLoginError('Su sesión ha expirado. Por favor, inicie sesión nuevamente.');
+          } else {
+            setLoginError('Ocurrió un error durante el inicio de sesión. Por favor, intente nuevamente.');
+          }
+        } else {
+          setLoginError('Email o contraseña incorrectos. Por favor, inténtalo de nuevo.');
+        }
       }
     }
   };

@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import ChatPage from './pages/ChatPage';
+import UsersPage from './pages/UsersPage';
 import { AuthProvider } from './context/AuthContext';
 import './styles/index.css'
 import './styles/sweetalert-custom.css';
@@ -15,6 +16,7 @@ const App: React.FC = () => {
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/chat" element={<ChatPage />} />
+          <Route path="/users" element={<UsersPage />} />
         </Routes>
       </Router>
     </AuthProvider>
