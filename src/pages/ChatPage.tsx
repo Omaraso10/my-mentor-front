@@ -12,6 +12,7 @@ const ChatPage: React.FC = () => {
   const [selectedAdvice, setSelectedAdvice] = useState<Advice | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { user } = useAuth();
 
   useEffect(() => {
@@ -55,10 +56,12 @@ const ChatPage: React.FC = () => {
 
   const handleSelectAdvice = (advice: Advice) => {
     setSelectedAdvice(advice);
+    setIsSidebarOpen(false);  // Cierra el sidebar en dispositivos móviles después de seleccionar
   };
 
   const handleNewAdvice = () => {
     setSelectedAdvice(null);
+    setIsSidebarOpen(false);  // Cierra el sidebar en dispositivos móviles después de crear una nueva asesoría
   };
 
   const handleDeleteAdvice = async (adviceId: number) => {
@@ -74,13 +77,17 @@ const ChatPage: React.FC = () => {
     }
   };
 
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
   if (loading) return <div>Cargando...</div>;
 
   return (
-    <div className="chat-page no-scroll">
-      <Header />
+    <div className="chat-page">
+      <Header toggleSidebar={toggleSidebar} />
       <div className="chat-content">
-        <div className="sidebar">
+        <div className={`sidebar ${isSidebarOpen ? 'open' : ''}`}>
           <button className="new-advice-button" onClick={handleNewAdvice}>
             Nueva Asesoría
           </button>

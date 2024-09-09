@@ -1,15 +1,66 @@
 .app-header {
   background-color: #f8f9fa;
   padding: 1rem;
-  border-bottom: 1px solid #e0e0e0;
-  height: 60px; /* Ajusta este valor según tus necesidades */
   display: flex;
   justify-content: space-between;
   align-items: center;
+  height: 60px;
+  border-bottom: 1px solid #ddd;
 }
 
-.app-header h1 {
-  margin: 0;
+.logo a {
   font-size: 1.5rem;
+  font-weight: bold;
   color: #333;
+  text-decoration: none;
+}
+
+nav ul {
+  display: flex;
+  list-style-type: none;
+}
+
+nav ul li {
+  margin-left: 20px;
+}
+
+nav ul li a {
+  color: #333;
+  text-decoration: none;
+}
+
+.menu-toggle, .sidebar-toggle {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .menu-toggle, .sidebar-toggle {
+    display: block;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+  }
+
+  nav {
+    display: none;
+  }
+
+  nav.open {
+    display: block;
+    position: absolute;
+    top: 60px;
+    left: 0;
+    right: 0;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #ddd;
+  }
+
+  nav.open ul {
+    flex-direction: column;
+  }
+
+  nav.open ul li {
+    margin: 10px 0;
+  }
 }

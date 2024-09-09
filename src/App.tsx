@@ -5,8 +5,6 @@ import LoginPage from './pages/LoginPage';
 import ChatPage from './pages/ChatPage';
 import UsersPage from './pages/UsersPage';
 import { AuthProvider } from './context/AuthContext';
-import './styles/index.css'
-import './styles/sweetalert-custom.css';
 
 const App: React.FC = () => {
   return (

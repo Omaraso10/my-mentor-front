@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { createAdvice, updateAdvice, getAdviceDetails, AdviceResponse, Advice, AdviceDetail } from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import './Chat.css';
+import Swal from 'sweetalert2';
 
 interface ChatProps {
   selectedAdvice: Advice | null;
@@ -14,7 +16,7 @@ const Chat: React.FC<ChatProps> = ({ selectedAdvice, onNewAdvice }) => {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [apiType, setApiType] = useState<string>('openai');
+  const [apiType, setApiType] = useState<string>('anthropic');
   const { getGeneralAsesorId } = useAuth();
 
   useEffect(() => {
@@ -31,38 +33,30 @@ const Chat: React.FC<ChatProps> = ({ selectedAdvice, onNewAdvice }) => {
         setMessages([]);
       }
     };
-
     loadAdviceDetails();
   }, [selectedAdvice]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim()) return;
-
     setIsLoading(true);
     setError(null);
-
     const asesorId = getGeneralAsesorId();
     if (!asesorId) {
       setError('No se pudo obtener el ID del asesor general.');
       setIsLoading(false);
       return;
     }
-
     try {
       let response: AdviceResponse;
-
       if (!selectedAdvice) {
         response = await createAdvice(asesorId, input, apiType);
         onNewAdvice(response.advice);
       } else {
         response = await updateAdvice(selectedAdvice.id, asesorId, input, apiType);
       }
-
-      // Actualizar los mensajes con los detalles más recientes
       const updatedAdvice = await getAdviceDetails(response.advice.id);
       setMessages(updatedAdvice.advice.advisorys_details);
-
       setInput('');
     } catch (error) {
       console.error('Error sending message:', error);
@@ -72,6 +66,83 @@ const Chat: React.FC<ChatProps> = ({ selectedAdvice, onNewAdvice }) => {
     }
   };
 
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text).then(() => {
+      Swal.fire({
+        icon: 'success',
+        title: '¡Copiado!',
+        text: 'El código ha sido copiado al portapapeles',
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+          toast.addEventListener('mouseenter', Swal.stopTimer)
+          toast.addEventListener('mouseleave', Swal.resumeTimer)
+        }
+      });
+    }, (err) => {
+      console.error('Error al copiar el texto: ', err);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'No se pudo copiar el código al portapapeles',
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+      });
+    });
+  };
+
+  const renderMessage = (content: string) => {
+    return (
+      <ReactMarkdown
+        components={{
+          code({node, inline, className, children, ...props}: any) {
+            const match = /language-(\w+)/.exec(className || '')
+            return !inline && match ? (
+              <div>
+                <div className="code-block-header">
+                  <span>{match[1]}</span>
+                  <button 
+                    className="copy-button"
+                    onClick={() => copyToClipboard(String(children).replace(/\n$/, ''))}
+                  >
+                    Copiar
+                  </button>
+                </div>
+                <SyntaxHighlighter
+                  style={vscDarkPlus as any}
+                  language={match[1]}
+                  PreTag="div"
+                  {...props}
+                  customStyle={{
+                    marginTop: 0,
+                    borderTopLeftRadius: 0,
+                    borderTopRightRadius: 0,
+                  }}
+                  wrapLines={true}
+                  wrapLongLines={true}
+                >
+                  {String(children).replace(/\n$/, '')}
+                </SyntaxHighlighter>
+              </div>
+            ) : (
+              <code className={className} {...props}>
+                {children}
+              </code>
+            )
+          }
+        }}
+      >
+        {content}
+      </ReactMarkdown>
+    );
+  };
+
   return (
     <div className="chat">
       <div className="chat-messages">
@@ -79,7 +150,7 @@ const Chat: React.FC<ChatProps> = ({ selectedAdvice, onNewAdvice }) => {
           <div key={index} className="message">
             <p className="user-message">{message.question}</p>
             <div className="ai-message">
-              <ReactMarkdown>{message.answer}</ReactMarkdown>
+              {renderMessage(message.answer)}
             </div>
           </div>
         ))}

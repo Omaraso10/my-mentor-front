@@ -1,15 +1,24 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import '../styles/Header.css';
 
-const Header: React.FC = () => {
+interface HeaderProps {
+  toggleSidebar: () => void;
+}
+
+const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
   const { isAuthenticated, user, logout } = useAuth();
   const navigate = useNavigate();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
     navigate('/');
+  };
+
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
   };
 
   return (
@@ -17,17 +26,20 @@ const Header: React.FC = () => {
       <div className="logo">
         <Link to="/">MY-Mentor</Link>
       </div>
-      <nav>
+      <button className="menu-toggle" onClick={toggleMenu}>
+        ☰
+      </button>
+      <nav className={isMenuOpen ? 'open' : ''}>
         <ul>
-          <li><Link to="/">Inicio</Link></li>
+          <li><Link to="/" onClick={toggleMenu}>Inicio</Link></li>
           {isAuthenticated && (
             <>
-              <li><Link to="/chat">Chat</Link></li>
+              <li><Link to="/chat" onClick={toggleMenu}>Chat</Link></li>
               {user?.admin && (
-                <li><Link to="/users">Usuarios</Link></li>
+                <li><Link to="/users" onClick={toggleMenu}>Usuarios</Link></li>
               )}
               <li>
-                <button onClick={handleLogout} className="logout-button">
+                <button onClick={() => { handleLogout(); toggleMenu(); }} className="logout-button">
                   Cerrar Sesión
                 </button>
               </li>
@@ -37,10 +49,15 @@ const Header: React.FC = () => {
             </>
           )}
           {!isAuthenticated && (
-            <li><Link to="/login">Iniciar Sesión</Link></li>
+            <li><Link to="/login" onClick={toggleMenu}>Iniciar Sesión</Link></li>
           )}
         </ul>
       </nav>
+      {isAuthenticated && (
+        <button className="sidebar-toggle" onClick={toggleSidebar}>
+          Asesorías
+        </button>
+      )}
     </header>
   );
 };

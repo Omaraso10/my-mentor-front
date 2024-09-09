@@ -7,9 +7,12 @@ import '../styles/HomePage.css';
 const HomePage: React.FC = () => {
   const { isAuthenticated, user } = useAuth();
 
+  const toggleSidebar = () => {
+  };
+
   return (
     <div className="home-page">
-      <Header />
+      <Header toggleSidebar={toggleSidebar} />
       <main className="home-content">
         <section className="hero">
           <h1>Bienvenido a MY-Mentor</h1>
