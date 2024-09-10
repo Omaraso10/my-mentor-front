@@ -164,24 +164,26 @@ const Chat: React.FC<ChatProps> = ({ selectedAdvice, onNewAdvice }) => {
       </div>
       {error && <p className="error-message">{error}</p>}
       <form onSubmit={handleSubmit} className="chat-input">
-        <input
-          type="text"
+        <textarea
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder={selectedAdvice ? "Escribe tu mensaje..." : "Escribe para iniciar una nueva asesoría..."}
           disabled={isLoading}
+          rows={2}
         />
-        <select
-          value={apiType}
-          onChange={(e) => setApiType(e.target.value)}
-          disabled={isLoading}
-        >
-          <option value="openai">OpenAI</option>
-          <option value="anthropic">Anthropic</option>
-        </select>
-        <button type="submit" disabled={isLoading}>
-          {isLoading ? 'Enviando...' : 'Enviar'}
-        </button>
+        <div className="chat-input-controls">
+          <select
+            value={apiType}
+            onChange={(e) => setApiType(e.target.value)}
+            disabled={isLoading}
+          >
+            <option value="openai">OpenAI</option>
+            <option value="anthropic">Anthropic</option>
+          </select>
+          <button type="submit" disabled={isLoading}>
+            {isLoading ? 'Enviando...' : 'Enviar'}
+          </button>
+        </div>
       </form>
     </div>
   );
