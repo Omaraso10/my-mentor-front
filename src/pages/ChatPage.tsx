@@ -86,7 +86,7 @@ const ChatPage: React.FC = () => {
   return (
     <div className="chat-page">
       <Header toggleSidebar={toggleSidebar} />
-      <div className="chat-content">
+      <div className={`chat-content ${isSidebarOpen ? 'sidebar-open' : ''}`}>
         <div className={`sidebar ${isSidebarOpen ? 'open' : ''}`}>
           <button className="new-advice-button" onClick={handleNewAdvice}>
             Nueva Asesoría
@@ -113,6 +113,9 @@ const ChatPage: React.FC = () => {
           />
         </div>
       </div>
+      <button className="sidebar-toggle" onClick={toggleSidebar}>
+        {isSidebarOpen ? '✕' : '☰'}
+      </button>
     </div>
   );
 };

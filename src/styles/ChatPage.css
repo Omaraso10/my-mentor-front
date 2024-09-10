@@ -284,50 +284,25 @@
 
 /* Estilos responsivos */
 @media (max-width: 768px) {
-  .chat-page {
-    flex-direction: column;
-  }
-
-  .chat-content {
-    flex-direction: column;
-  }
-
   .sidebar {
     position: fixed;
     top: 60px; /* Ajusta esto según la altura de tu header */
-    left: -265px;
+    left: 0;
     height: calc(100vh - 60px);
-    z-index: 1000;
+    transform: translateX(-100%);
   }
 
   .sidebar.open {
-    transform: translateX(265px);
+    transform: translateX(0);
   }
 
-  .chat-container {
-    width: 100%;
-    max-width: 100%;
-    padding: 10px;
+  .chat-content {
+    margin-left: 0;
+    transition: margin-left 0.3s ease-in-out;
   }
 
-  .chat-input {
-    flex-direction: column;
-  }
-
-  .chat-input input,
-  .chat-input select,
-  .chat-input button {
-    width: 100%;
-    margin-right: 0;
-    margin-bottom: 10px;
-  }
-
-  .chat-input button {
-    margin-bottom: 0;
-  }
-
-  .message {
-    max-width: 90%;
+  .chat-content.sidebar-open {
+    margin-left: 265px;
   }
 }
 
@@ -339,9 +314,22 @@
 @media (max-width: 768px) {
   .sidebar-toggle {
     display: block;
-    background: none;
+    position: fixed;
+    top: 70px;
+    left: 10px;
+    z-index: 1001;
+    background-color: #007bff;
+    color: white;
     border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
     font-size: 1.5rem;
     cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  }
+
+  .sidebar-toggle:hover {
+    background-color: #0056b3;
   }
 }

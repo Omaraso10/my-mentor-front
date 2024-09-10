@@ -54,8 +54,8 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
         </ul>
       </nav>
       {isAuthenticated && (
-        <button className="sidebar-toggle" onClick={toggleSidebar}>
-          Asesorías
+        <button className="sidebar-toggle" onClick={toggleSidebar} aria-label="Toggle sidebar">
+          ☰
         </button>
       )}
     </header>
