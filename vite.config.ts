@@ -7,11 +7,11 @@ import autoprefixer from 'autoprefixer'
 export default defineConfig({
   plugins: [react()],
   server: {
-    port: Number(process.env.PORT) || 3000,
+    port: process.env.PORT ? Number(process.env.PORT) : 3000,
     host: '0.0.0.0'
   },
   define: {
-    'process.env': {}
+    'process.env.VITE_API_URL': JSON.stringify(process.env.VITE_API_URL),
   },
   resolve: {
     alias: {
