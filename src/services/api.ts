@@ -130,6 +130,14 @@ export interface UsersResponse {
   usuarios: User[];
 }
 
+export interface UpdateUserRequest {
+  name: string;
+  last_name: string;
+  phone_number: number;
+  admin: boolean;
+  enabled: boolean;
+}
+
 export const getUsers = async (): Promise<UsersResponse> => {
   try {
     const response = await api.get<UsersResponse>('/users');
@@ -146,6 +154,16 @@ export const createUser = async (userData: CreateUserRequest): Promise<CreateUse
     return response.data;
   } catch (error) {
     console.error('Error creating user:', error);
+    throw error;
+  }
+};
+
+export const updateUser = async (uuid: string, userData: UpdateUserRequest): Promise<UserResponse> => {
+  try {
+    const response = await api.put<UserResponse>(`/users/${uuid}`, userData);
+    return response.data;
+  } catch (error) {
+    console.error('Error updating user:', error);
     throw error;
   }
 };
@@ -198,14 +216,19 @@ export const updateAdvice = async (id: number, user_professional_id: number, ask
 };
 
 export const getAdvisorys = async (professionalId: number): Promise<AdviceListResponse> => {
-    try {
-        const response = await api.get<AdviceListResponse>(`/gpt/professional/${professionalId}`);
-        return response.data;
-    } catch (error) {
-        console.error('Error get advisorys:', error);
-        throw error;
+  try {
+    const response = await api.get<AdviceListResponse>(`/gpt/professional/${professionalId}`);
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      if (error.response?.status === 404) {
+        return { advisorys: [], mensaje: "No hay asesorías disponibles." };
+      }
+      throw new Error(`Error al obtener asesorías: ${error.message}`);
     }
-  };
+    throw error;
+  }
+};
 
 export const getAdviceDetails = async (adviceId: number): Promise<AdviceResponse> => {
   try {

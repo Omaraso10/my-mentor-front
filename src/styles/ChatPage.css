@@ -189,6 +189,7 @@
   border-radius: 8px;
   width: 100%;
 }
+
 .chat-input textarea {
   flex: 1;
   padding: 12px;
@@ -244,20 +245,37 @@
   margin-bottom: 10px;
 }
 
+/* Nuevo indicador de carga */
 .loading-indicator {
-  display: inline-block;
-  font-style: italic;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
 }
 
-.loading-indicator::after {
-  content: '...';
-  animation: ellipsis 1.5s infinite;
+.loading-indicator__dot {
+  width: 10px;
+  height: 10px;
+  background-color: #007bff;
+  border-radius: 50%;
+  margin: 0 5px;
+  animation: bounce 1.4s infinite ease-in-out both;
 }
 
-@keyframes ellipsis {
-  0% { content: '.'; }
-  33% { content: '..'; }
-  66% { content: '...'; }
+.loading-indicator__dot:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.loading-indicator__dot:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+@keyframes bounce {
+  0%, 80%, 100% { 
+    transform: scale(0);
+  } 40% { 
+    transform: scale(1.0);
+  }
 }
 
 .code-block-header {
@@ -291,6 +309,27 @@
   margin-top: 0;
   border-top-left-radius: 0;
   border-top-right-radius: 0;
+}
+
+/* Estilos para el marcador de posición "sin conversaciones" */
+.no-conversations {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  text-align: center;
+  color: #6c757d;
+}
+
+.no-conversations img {
+  margin-bottom: 20px;
+  opacity: 0.5;
+}
+
+.no-conversations p {
+  font-size: 18px;
+  max-width: 300px;
 }
 
 /* Estilos responsivos */
@@ -383,9 +422,7 @@
   .sidebar-toggle:hover {
     background-color: #0056b3;
   }
-}
 
-@media (max-width: 768px) {
   .chat-input {
     flex-direction: column;
     align-items: stretch;

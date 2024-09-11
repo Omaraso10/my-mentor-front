@@ -12,7 +12,7 @@ interface AdviceListProps {
 
 const AdviceList: React.FC<AdviceListProps> = ({ advisories, onSelectAdvice, onDeleteAdvice, selectedAdviceId }) => {
   const handleDelete = async (e: React.MouseEvent, adviceId: number) => {
-    e.stopPropagation(); // Evita que se seleccione la asesoría al hacer clic en eliminar
+    e.stopPropagation();
     
     const result = await Swal.fire({
       title: '¿Estás seguro?',
@@ -35,29 +35,32 @@ const AdviceList: React.FC<AdviceListProps> = ({ advisories, onSelectAdvice, onD
     }
   };
 
-  // Ordenar las asesorías de la más reciente a la más antigua
   const sortedAdvisories = [...advisories].sort((a, b) => b.id - a.id);
 
   return (
     <div className="advice-list">
       <h2>Asesorías anteriores</h2>
-      <ul>
-        {sortedAdvisories.map((advice) => (
-          <li 
-            key={advice.id} 
-            onClick={() => onSelectAdvice(advice)}
-            className={advice.id === selectedAdviceId ? 'selected' : ''}
-          >
-            <span>{advice.description}</span>
-            <button 
-              className="delete-button"
-              onClick={(e) => handleDelete(e, advice.id)}
+      {sortedAdvisories.length === 0 ? (
+        <p className="no-advisories">Sin asesorías aún.</p>
+      ) : (
+        <ul>
+          {sortedAdvisories.map((advice) => (
+            <li 
+              key={advice.id} 
+              onClick={() => onSelectAdvice(advice)}
+              className={advice.id === selectedAdviceId ? 'selected' : ''}
             >
-              X
-            </button>
-          </li>
-        ))}
-      </ul>
+              <span>{advice.description}</span>
+              <button 
+                className="delete-button"
+                onClick={(e) => handleDelete(e, advice.id)}
+              >
+                X
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 };

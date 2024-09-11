@@ -1,18 +1,18 @@
 import React from 'react';
 import Header from '../components/Header';
 import Users from '../components/Users';
-import '../styles/UsersPage.css';
 
 const UsersPage: React.FC = () => {
   const toggleSidebar = () => {
+    
   };
 
   return (
-    <div className="users-page">
+    <div className="flex flex-col min-h-screen">
       <Header toggleSidebar={toggleSidebar} />
-      <div className="users-content">
+      <main className="flex-grow bg-gray-100">
         <Users />
-      </div>
+      </main>
     </div>
   );
 };

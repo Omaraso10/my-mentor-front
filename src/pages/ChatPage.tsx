@@ -5,7 +5,6 @@ import Header from '../components/Header';
 import AdviceList from '../components/AdviceList';
 import Chat from '../components/Chat';
 import '../styles/ChatPage.css';
-import axios from 'axios';
 
 const ChatPage: React.FC = () => {
   const [advisories, setAdvisories] = useState<Advice[]>([]);
@@ -30,6 +29,8 @@ const ChatPage: React.FC = () => {
   };
 
   const loadAdvisories = async () => {
+    setLoading(true);
+    setError(null);
     const asesorId = getGeneralConsultationAsesorId();
     if (asesorId === null) {
       setError("No se encontró el asesor de Consulta General");
@@ -40,28 +41,23 @@ const ChatPage: React.FC = () => {
     try {
       const response = await getAdvisorys(asesorId);
       setAdvisories(response.advisorys);
-      setLoading(false);
-      setError(null);
     } catch (error) {
       console.error('Error loading advisories:', error);
-      if (axios.isAxiosError(error) && error.response?.status === 404) {
-        setAdvisories([]);
-        setError("Sin asesorías aún.");
-      } else {
-        setError("Error al cargar las asesorías. Por favor, intente nuevamente.");
-      }
+      setError(error instanceof Error ? error.message : "Error desconocido al cargar las asesorías");
+      setAdvisories([]);
+    } finally {
       setLoading(false);
     }
   };
 
   const handleSelectAdvice = (advice: Advice) => {
     setSelectedAdvice(advice);
-    setIsSidebarOpen(false);  // Cierra el sidebar en dispositivos móviles después de seleccionar
+    setIsSidebarOpen(false);
   };
 
   const handleNewAdvice = () => {
     setSelectedAdvice(null);
-    setIsSidebarOpen(false);  // Cierra el sidebar en dispositivos móviles después de crear una nueva asesoría
+    setIsSidebarOpen(false);
   };
 
   const handleDeleteAdvice = async (adviceId: number) => {
@@ -81,8 +77,6 @@ const ChatPage: React.FC = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
-  if (loading) return <div>Cargando...</div>;
-
   return (
     <div className="chat-page">
       <Header toggleSidebar={toggleSidebar} />
@@ -91,26 +85,27 @@ const ChatPage: React.FC = () => {
           <button className="new-advice-button" onClick={handleNewAdvice}>
             Nueva Asesoría
           </button>
-          {error ? (
-            <div className="error-message">{error}</div>
-          ) : (
-            <AdviceList 
-              advisories={advisories} 
-              onSelectAdvice={handleSelectAdvice}
-              onDeleteAdvice={handleDeleteAdvice}
-              selectedAdviceId={selectedAdvice?.id}
-            />
-          )}
+          <AdviceList 
+            advisories={advisories} 
+            onSelectAdvice={handleSelectAdvice}
+            onDeleteAdvice={handleDeleteAdvice}
+            selectedAdviceId={selectedAdvice?.id}
+          />
         </div>
         <div className="chat-container">
-          <Chat 
-            selectedAdvice={selectedAdvice}
-            onNewAdvice={(newAdvice) => {
-              setAdvisories(prev => [newAdvice, ...prev]);
-              setSelectedAdvice(newAdvice);
-              setError(null); 
-            }}
-          />
+          {loading ? (
+            <div className="loading-indicator">Cargando...</div>
+          ) : error ? (
+            <div className="error-message">{error}</div>
+          ) : (
+            <Chat 
+              selectedAdvice={selectedAdvice}
+              onNewAdvice={(newAdvice) => {
+                setAdvisories(prev => [newAdvice, ...prev]);
+                setSelectedAdvice(newAdvice);
+              }}
+            />
+          )}
         </div>
       </div>
       <button className="sidebar-toggle" onClick={toggleSidebar}>

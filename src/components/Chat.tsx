@@ -11,6 +11,26 @@ interface ChatProps {
   onNewAdvice: (newAdvice: Advice) => void;
 }
 
+interface LanguagePattern {
+  pattern: RegExp;
+  inline?: RegExp;
+}
+
+const languagePatterns: Record<string, LanguagePattern> = {
+  java: {
+    pattern: /^(\s*)(public\s+)?(class|interface|enum)\s+[\w_$]+\s*(\{[\s\S]*?\n\s*\})/gm,
+    inline: /`([^`]+)`/g
+  },
+  python: {
+    pattern: /^(\s*)(def|class)\s+[\w_]+[\s\S]*?:/gm,
+    inline: /`([^`]+)`/g
+  },
+  javascript: {
+    pattern: /^(\s*)(function|class|const|let|var)\s+[\w_$]+[\s\S]*?\{[\s\S]*?\}/gm,
+    inline: /`([^`]+)`/g
+  },
+};
+
 const Chat: React.FC<ChatProps> = ({ selectedAdvice, onNewAdvice }) => {
   const [messages, setMessages] = useState<AdviceDetail[]>([]);
   const [input, setInput] = useState('');
@@ -97,14 +117,46 @@ const Chat: React.FC<ChatProps> = ({ selectedAdvice, onNewAdvice }) => {
     });
   };
 
+  const formatCodeBlocks = (text: string) => {
+    let formattedText = text;
+
+    const containsFormattedBlocks = /```[\s\S]*?```/g.test(text);
+
+    if (!containsFormattedBlocks) {
+      const javaPattern = /public\s+class\s+\w+\s*\{[\s\S]*?\n\s*\}/g;
+
+      formattedText = formattedText.replace(javaPattern, (match) => {
+        return "```java\n" + match.trim() + "\n```";
+      });
+    
+      Object.entries(languagePatterns).forEach(([language, { pattern, inline }]) => {
+        if (language !== 'java') {
+          formattedText = formattedText.replace(pattern, (match, indent = '') => {
+            return `${indent}\`\`\`${language}\n${match.trim()}\n${indent}\`\`\``;
+          });
+        }
+
+        if (inline) {
+          formattedText = formattedText.replace(inline, (_, code) => {
+            return `\`${code}\``;
+          });
+        }
+      });
+    }
+  
+    return formattedText;
+  };
+
   const renderMessage = (content: string) => {
+    const formattedContent = formatCodeBlocks(content);
+
     return (
       <ReactMarkdown
         components={{
           code({node, inline, className, children, ...props}: any) {
             const match = /language-(\w+)/.exec(className || '')
             return !inline && match ? (
-              <div>
+              <div className="code-block">
                 <div className="code-block-header">
                   <span>{match[1]}</span>
                   <button 
@@ -120,12 +172,10 @@ const Chat: React.FC<ChatProps> = ({ selectedAdvice, onNewAdvice }) => {
                   PreTag="div"
                   {...props}
                   customStyle={{
-                    marginTop: 0,
+                    margin: 0,
                     borderTopLeftRadius: 0,
                     borderTopRightRadius: 0,
                   }}
-                  wrapLines={true}
-                  wrapLongLines={true}
                 >
                   {String(children).replace(/\n$/, '')}
                 </SyntaxHighlighter>
@@ -138,7 +188,7 @@ const Chat: React.FC<ChatProps> = ({ selectedAdvice, onNewAdvice }) => {
           }
         }}
       >
-        {content}
+        {formattedContent}
       </ReactMarkdown>
     );
   };
@@ -146,19 +196,29 @@ const Chat: React.FC<ChatProps> = ({ selectedAdvice, onNewAdvice }) => {
   return (
     <div className="chat">
       <div className="chat-messages">
-        {messages.map((message, index) => (
-          <div key={index} className="message">
-            <p className="user-message">{message.question}</p>
-            <div className="ai-message">
-              {renderMessage(message.answer)}
-            </div>
+        {messages.length === 0 && !selectedAdvice ? (
+          <div className="no-conversations">
+            <p>Hola, estoy listo para ayudarte.</p> <p>¿En qué puedo asesorarte hoy?</p>
           </div>
-        ))}
+        ) : (
+          messages.map((message, index) => (
+            <div key={index} className="message">
+              <p className="user-message">{message.question}</p>
+              <div className="ai-message">
+                {renderMessage(message.answer)}
+              </div>
+            </div>
+          ))
+        )}
         {isLoading && (
           <div className="message">
-            <p className="ai-message">
-              <span className="loading-indicator">Pensando</span>
-            </p>
+            <div className="ai-message">
+              <div className="loading-indicator">
+                <div className="loading-indicator__dot"></div>
+                <div className="loading-indicator__dot"></div>
+                <div className="loading-indicator__dot"></div>
+              </div>
+            </div>
           </div>
         )}
       </div>
@@ -167,7 +227,7 @@ const Chat: React.FC<ChatProps> = ({ selectedAdvice, onNewAdvice }) => {
         <textarea
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder={selectedAdvice ? "Escribe tu mensaje..." : "Escribe para iniciar una nueva asesoría..."}
+          placeholder={selectedAdvice ? "Escribe tu mensaje..." : "Escribe aquí para iniciar una nueva asesoría..."}
           disabled={isLoading}
           rows={2}
         />
