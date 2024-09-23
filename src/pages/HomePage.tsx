@@ -15,7 +15,7 @@ const HomePage: React.FC = () => {
       <Header toggleSidebar={toggleSidebar} />
       <main className="home-content">
         <section className="hero">
-          <h1>Bienvenido a MY-Mentor</h1>
+          <h1>Bienvenido a MyMentor</h1>
           <p className="subtitle">Tu plataforma de asesorías profesionales con IA</p>
           
           {isAuthenticated ? (

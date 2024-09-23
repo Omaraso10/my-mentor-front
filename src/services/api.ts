@@ -11,7 +11,7 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 30000, 
+  timeout: Number(import.meta.env.TIME_OUT), 
 });
 
 api.interceptors.request.use((config) => {

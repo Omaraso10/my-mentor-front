@@ -24,7 +24,8 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
   return (
     <header className="app-header">
       <div className="logo">
-        <Link to="/">MY-Mentor</Link>
+        <img src="/mental.png" alt="MyMentor Logo" className="header-icon" />
+        <Link to="/">MyMentor</Link>
       </div>
       <button className="menu-toggle" onClick={toggleMenu}>
         ☰

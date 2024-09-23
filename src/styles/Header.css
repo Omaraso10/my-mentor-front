@@ -8,11 +8,22 @@
   border-bottom: 1px solid #ddd;
 }
 
+.logo {
+  display: flex;
+  align-items: center;
+}
+
 .logo a {
   font-size: 1.5rem;
   font-weight: bold;
   color: #333;
   text-decoration: none;
+}
+
+.header-icon {
+  height: 1.5rem; /* Mismo tamaño que el texto del título */
+  width: auto; /* Mantiene la proporción de la imagen */
+  margin-right: 0.5rem; /* Espacio entre el icono y el texto */
 }
 
 nav ul {

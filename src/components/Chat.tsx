@@ -32,6 +32,7 @@ const languagePatterns: Record<string, LanguagePattern> = {
 };
 
 const Chat: React.FC<ChatProps> = ({ selectedAdvice, onNewAdvice }) => {
+  const { user } = useAuth();
   const [messages, setMessages] = useState<AdviceDetail[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -198,7 +199,7 @@ const Chat: React.FC<ChatProps> = ({ selectedAdvice, onNewAdvice }) => {
       <div className="chat-messages">
         {messages.length === 0 && !selectedAdvice ? (
           <div className="no-conversations">
-            <p>Hola, estoy listo para ayudarte.</p> <p>¿En qué puedo asesorarte hoy?</p>
+            <p>Hola {user?.name}, estoy listo para ayudarte.</p> <p>¿En qué puedo asesorarte hoy?</p>
           </div>
         ) : (
           messages.map((message, index) => (
