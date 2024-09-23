@@ -148,49 +148,54 @@ const Chat: React.FC<ChatProps> = ({ selectedAdvice, onNewAdvice }) => {
     return formattedText;
   };
 
-  const renderMessage = (content: string) => {
+  const renderMessage = (content: string, model: string) => {
     const formattedContent = formatCodeBlocks(content);
 
     return (
-      <ReactMarkdown
-        components={{
-          code({node, inline, className, children, ...props}: any) {
-            const match = /language-(\w+)/.exec(className || '')
-            return !inline && match ? (
-              <div className="code-block">
-                <div className="code-block-header">
-                  <span>{match[1]}</span>
-                  <button 
-                    className="copy-button"
-                    onClick={() => copyToClipboard(String(children).replace(/\n$/, ''))}
+      <div className="message-container">
+        <div className={`model-indicator ${model.toLowerCase()}`}>
+          {model}
+        </div>
+        <ReactMarkdown
+          components={{
+            code({node, inline, className, children, ...props}: any) {
+              const match = /language-(\w+)/.exec(className || '')
+              return !inline && match ? (
+                <div className="code-block">
+                  <div className="code-block-header">
+                    <span>{match[1]}</span>
+                    <button 
+                      className="copy-button"
+                      onClick={() => copyToClipboard(String(children).replace(/\n$/, ''))}
+                    >
+                      Copiar
+                    </button>
+                  </div>
+                  <SyntaxHighlighter
+                    style={vscDarkPlus as any}
+                    language={match[1]}
+                    PreTag="div"
+                    {...props}
+                    customStyle={{
+                      margin: 0,
+                      borderTopLeftRadius: 0,
+                      borderTopRightRadius: 0,
+                    }}
                   >
-                    Copiar
-                  </button>
+                    {String(children).replace(/\n$/, '')}
+                  </SyntaxHighlighter>
                 </div>
-                <SyntaxHighlighter
-                  style={vscDarkPlus as any}
-                  language={match[1]}
-                  PreTag="div"
-                  {...props}
-                  customStyle={{
-                    margin: 0,
-                    borderTopLeftRadius: 0,
-                    borderTopRightRadius: 0,
-                  }}
-                >
-                  {String(children).replace(/\n$/, '')}
-                </SyntaxHighlighter>
-              </div>
-            ) : (
-              <code className={className} {...props}>
-                {children}
-              </code>
-            )
-          }
-        }}
-      >
-        {formattedContent}
-      </ReactMarkdown>
+              ) : (
+                <code className={className} {...props}>
+                  {children}
+                </code>
+              )
+            }
+          }}
+        >
+          {formattedContent}
+        </ReactMarkdown>
+      </div>
     );
   };
 
@@ -206,7 +211,7 @@ const Chat: React.FC<ChatProps> = ({ selectedAdvice, onNewAdvice }) => {
             <div key={index} className="message">
               <p className="user-message">{message.question}</p>
               <div className="ai-message">
-                {renderMessage(message.answer)}
+                {renderMessage(message.answer, message.model)}
               </div>
             </div>
           ))

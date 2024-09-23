@@ -448,3 +448,38 @@
     margin-bottom: 0;
   }
 }
+
+.message-container {
+  position: relative;
+  width: 100%;
+  margin-top: 24px; /* Añade espacio arriba para el indicador del modelo */
+}
+
+.model-indicator {
+  position: absolute;
+  top: -24px;
+  right: 0;
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: rgb(40, 21, 94);
+  font-weight: bold;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.model-indicator.openai {
+  background-color: #10a37f;
+}
+
+.model-indicator.anthropic {
+  background-color: #0000ff;
+}
+
+.ai-message {
+  position: relative;
+  background-color: #f8f9fa;
+  border-radius: 20px 20px 20px 0;
+  padding: 15px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  margin-top: 24px; /* Añade espacio arriba para el indicador del modelo */
+}

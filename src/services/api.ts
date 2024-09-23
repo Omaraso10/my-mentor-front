@@ -61,7 +61,6 @@ export interface AdviceRequest {
 export interface Advice {
   id: number;
   description: string;
-  model: string;
   advisorys_details: AdviceDetail[];
 }
 
@@ -70,6 +69,7 @@ export interface AdviceDetail {
   line_number: number;
   question: string;
   answer: string;
+  model: string;
 }
   
 export interface AdviceResponse {
