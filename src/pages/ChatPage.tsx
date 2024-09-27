@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import Header from '../components/Header';
 import AdviceList from '../components/AdviceList';
 import Chat from '../components/Chat';
+import { PlusCircle } from 'lucide-react';
 import '../styles/ChatPage.css';
 
 const ChatPage: React.FC = () => {
@@ -99,7 +100,8 @@ const ChatPage: React.FC = () => {
       <div className={`chat-content ${isSidebarOpen ? 'sidebar-open' : ''}`}>
         <div className={`sidebar ${isSidebarOpen ? 'open' : ''}`}>
           <button className="new-advice-button" onClick={handleNewAdvice}>
-            Nueva Asesoría
+            <PlusCircle size={20} />
+            <span>Nueva Asesoría</span>
           </button>
           <AdviceList 
             advisories={advisories} 

@@ -1,74 +1,81 @@
 .advice-list {
-  width: 250px;
-  height: 100vh;
-  overflow-y: auto;
-  background-color: #f0f0f0;
-  padding: 20px;
-  border-right: 1px solid #ddd;
+  padding: 16px;
 }
 
-.advice-list h2 {
-  margin-bottom: 20px;
-  font-size: 18px;
+.advice-list-title {
+  font-size: 1.2rem;
+  font-weight: 600;
   color: #333;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #e0e0e0;
 }
 
-.advice-list ul {
+.no-advisories {
+  color: #666;
+  font-style: italic;
+  text-align: center;
+  margin-top: 20px;
+}
+
+.advice-items {
   list-style-type: none;
   padding: 0;
+  margin: 0;
 }
 
-.advice-list li {
+.advice-item {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 10px;
-  margin-bottom: 10px;
-  background-color: #fff;
-  border-radius: 5px;
+  justify-content: space-between;
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
   cursor: pointer;
-  transition: background-color 0.3s ease;
 }
 
-.advice-list li:hover {
-  background-color: #e0e0e0;
+.advice-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 
-.advice-list li.selected {
-  background-color: #007bff;
-  color: white;
+.advice-item.selected {
+  background-color: #e6f7ff;
+  border-left: 4px solid #1890ff;
 }
 
-.advice-list li span {
+.advice-description {
   flex-grow: 1;
-  margin-right: 10px;
+  margin-right: 12px;
+  font-size: 0.9rem;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .delete-button {
-  background-color: transparent;
-  color: #ff4d4d;
+  background: none;
   border: none;
-  width: 24px;
-  height: 24px;
-  font-size: 16px;
-  font-weight: bold;
+  color: #999;
   cursor: pointer;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  padding: 4px;
   transition: color 0.3s ease;
 }
 
 .delete-button:hover {
-  color: #ff1a1a;
+  color: #ff4d4f;
 }
 
-/* Opcional: si quieres que el botón de eliminar solo aparezca al pasar el ratón sobre el elemento */
-.advice-list li .delete-button {
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
+@media (max-width: 768px) {
+  .advice-item {
+    padding: 10px 12px;
+  }
 
-.advice-list li:hover .delete-button {
-  opacity: 1;
+  .advice-description {
+    font-size: 0.85rem;
+  }
 }

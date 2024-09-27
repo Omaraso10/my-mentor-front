@@ -26,37 +26,172 @@
 }
 
 .new-advice-button {
-  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 20px;
   margin: 16px;
   background-color: #4CAF50;
   color: white;
   border: none;
-  border-radius: 20px;
+  border-radius: 25px;
   cursor: pointer;
   font-size: 16px;
-  font-weight: bold;
+  font-weight: 600;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  position: relative;
 }
 
 .new-advice-button:hover {
   background-color: #45a049;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
   transform: translateY(-2px);
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
 }
 
 .new-advice-button:active {
   transform: translateY(0);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.new-advice-button::before {
-  content: "+";
+.new-advice-button svg {
   margin-right: 8px;
-  font-size: 20px;
+}
+
+.new-advice-button::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.5);
+  opacity: 0;
+  border-radius: 100%;
+  transform: scale(1, 1) translate(-50%);
+  transform-origin: 50% 50%;
+}
+
+.new-advice-button:hover::after {
+  animation: ripple 1s ease-out;
+}
+
+
+
+ChatPage Component with Modern New Advice Button
+Click to open code
+Ahora, vamos a actualizar los estilos CSS para el botón "Nueva Asesoría":
+
+
+Updated ChatPage CSS with Modern New Advice Button
+Click to open code
+Estos cambios incluyen:
+
+Agregar un icono PlusCircle de lucide-react al botón para un aspecto más moderno.
+Actualizar el estilo del botón con un diseño más suave y moderno:
+Bordes más redondeados (border-radius: 25px)
+Efecto de elevación con box-shadow
+Transición suave al hacer hover
+Efecto de "ripple" al hacer clic (animación de onda)
+Mejorar la disposición del contenido del botón con flexbox.
+Para implementar estos cambios:
+
+Actualiza el archivo ChatPage.tsx con el nuevo código del primer artefacto.
+Actualiza el archivo CSS (probablemente ChatPage.css) en la carpeta styles con los estilos del segundo artefacto.
+Asegúrate de que lucide-react esté instalado en tu proyecto. Si no lo está, puedes instalarlo con:
+
+Copy
+npm install lucide-react
+o
+
+Copy
+yarn add lucide-react
+Estos cambios deberían dar a tu botón "Nueva Asesoría" un aspecto más moderno y atractivo, manteniendo su funcionalidad actual. El nuevo diseño es más llamativo y proporciona una mejor experiencia visual para los usuarios.
+
+Copy
+Retry
+
+
+
+Claude can make mistakes. Please double-check responses.
+
+
+
+Sin archivos seleccionados
+
+
+3.5 Sonnet
+
+Updated ChatPage CSS with Modern New Advice Button
+
+/* ... (estilos anteriores sin cambios) */
+
+.new-advice-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 20px;
+  margin: 16px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  position: relative;
+}
+
+.new-advice-button:hover {
+  background-color: #45a049;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+}
+
+.new-advice-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.new-advice-button svg {
+  margin-right: 8px;
+}
+
+.new-advice-button::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.5);
+  opacity: 0;
+  border-radius: 100%;
+  transform: scale(1, 1) translate(-50%);
+  transform-origin: 50% 50%;
+}
+
+.new-advice-button:hover::after {
+  animation: ripple 1s ease-out;
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0, 0);
+    opacity: 0.5;
+  }
+  20% {
+    transform: scale(25, 25);
+    opacity: 0.3;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(40, 40);
+  }
 }
 
 .advice-list {
