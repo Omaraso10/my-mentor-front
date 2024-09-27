@@ -56,6 +56,8 @@ api.interceptors.response.use(
 export interface AdviceRequest {
   user_professional_id: number;
   ask: string;
+  api_type: string;
+  image?: string;
 }
 
 export interface Advice {
@@ -187,13 +189,9 @@ export const getUserByEmail = async (email: string): Promise<UserResponse> => {
   }
 };
 
-export const createAdvice = async (user_professional_id: number, ask: string, api_type: string): Promise<AdviceResponse> => {
+export const createAdvice = async (data: AdviceRequest): Promise<AdviceResponse> => {
   try {
-    const response = await api.post<AdviceResponse>('/gpt/professional/advice', {
-      user_professional_id,
-      ask,
-      api_type
-    });
+    const response = await api.post<AdviceResponse>('/gpt/professional/advice', data);
     return response.data;
   } catch (error) {
     console.error('Error creating advice:', error);
@@ -201,13 +199,9 @@ export const createAdvice = async (user_professional_id: number, ask: string, ap
   }
 };
 
-export const updateAdvice = async (id: number, user_professional_id: number, ask: string, api_type: string): Promise<AdviceResponse> => {
+export const updateAdvice = async (id: number, data: AdviceRequest): Promise<AdviceResponse> => {
   try {
-    const response = await api.put<AdviceResponse>(`/gpt/professional/advice/${id}`, {
-      user_professional_id,
-      ask,
-      api_type
-    });
+    const response = await api.put<AdviceResponse>(`/gpt/professional/advice/${id}`, data);
     return response.data;
   } catch (error) {
     console.error('Error updating advice:', error);

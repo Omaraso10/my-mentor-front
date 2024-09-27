@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { createAdvice, updateAdvice, getAdviceDetails, AdviceResponse, Advice, AdviceDetail } from '../services/api';
+import { createAdvice, updateAdvice, getAdviceDetails, AdviceResponse, Advice, AdviceDetail, AdviceRequest } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import Swal from 'sweetalert2';
+import { ImageIcon, SendIcon } from 'lucide-react';
 
 interface ChatProps {
   selectedAdvice: Advice | null;
@@ -39,6 +40,31 @@ const Chat: React.FC<ChatProps> = ({ selectedAdvice, onNewAdvice }) => {
   const [error, setError] = useState<string | null>(null);
   const [apiType, setApiType] = useState<string>('anthropic');
   const { getGeneralAsesorId } = useAuth();
+  const [imageBase64, setImageBase64] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const loadingIndicatorRef = useRef<HTMLDivElement>(null);
+  const lastMessageRef = useRef<HTMLDivElement>(null);
+  const chatMessagesRef = useRef<HTMLDivElement>(null);
+
+  const scrollToLoadingIndicator = () => {
+    setTimeout(() => {
+      loadingIndicatorRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 0);
+  };
+
+  const scrollToLastMessage = () => {
+    setTimeout(() => {
+      lastMessageRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 0);
+  };
+
+  useEffect(() => {
+    if (isLoading) {
+      scrollToLoadingIndicator();
+    } else if (messages.length > 0) {
+      scrollToLastMessage();
+    }
+  }, [isLoading, messages]);
 
   useEffect(() => {
     const loadAdviceDetails = async () => {
@@ -59,9 +85,14 @@ const Chat: React.FC<ChatProps> = ({ selectedAdvice, onNewAdvice }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim()) return;
+    if (!input.trim() && !imageBase64) return;
+    
+    const currentImageBase64 = imageBase64; // Guardar el valor actual de imageBase64
+    clearImage(); // Limpiar la imagen inmediatamente
+    
     setIsLoading(true);
     setError(null);
+
     const asesorId = getGeneralAsesorId();
     if (!asesorId) {
       setError('No se pudo obtener el ID del asesor general.');
@@ -69,21 +100,63 @@ const Chat: React.FC<ChatProps> = ({ selectedAdvice, onNewAdvice }) => {
       return;
     }
     try {
+      const adviceData: AdviceRequest = {
+        user_professional_id: asesorId,
+        ask: input,
+        api_type: apiType,
+        image: currentImageBase64 || undefined
+      };
+  
       let response: AdviceResponse;
       if (!selectedAdvice) {
-        response = await createAdvice(asesorId, input, apiType);
-        onNewAdvice(response.advice);
+        response = await createAdvice(adviceData);
       } else {
-        response = await updateAdvice(selectedAdvice.id, asesorId, input, apiType);
+        response = await updateAdvice(selectedAdvice.id, adviceData);
       }
-      const updatedAdvice = await getAdviceDetails(response.advice.id);
-      setMessages(updatedAdvice.advice.advisorys_details);
-      setInput('');
+      
+      if (response.advice) {
+        const updatedAdvice = await getAdviceDetails(response.advice.id);
+        setMessages(updatedAdvice.advice.advisorys_details);
+        onNewAdvice(updatedAdvice.advice);
+        setInput('');
+      } else {
+        throw new Error('No se recibió una respuesta válida del servidor');
+      }
     } catch (error) {
       console.error('Error sending message:', error);
       setError('Hubo un error al enviar tu mensaje. Por favor, intenta de nuevo.');
+      if (error instanceof Error) {
+        console.error('Error details:', error.message);
+      }
     } finally {
       setIsLoading(false);
+    }
+  };
+  
+  const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB en bytes
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      if (file.size > MAX_FILE_SIZE) {
+        setError('El archivo es demasiado grande. El tamaño máximo es de 10 MB.');
+        e.target.value = ''; // Limpia el input
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        setImageBase64(base64String.split(',')[1]); // Guardamos solo la parte de datos del base64
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const clearImage = () => {
+    setImageBase64(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
   };
 
@@ -148,13 +221,13 @@ const Chat: React.FC<ChatProps> = ({ selectedAdvice, onNewAdvice }) => {
     return formattedText;
   };
 
-  const renderMessage = (content: string, model: string) => {
-    const formattedContent = formatCodeBlocks(content);
+  const renderMessage = (message: AdviceDetail) => {
+    const formattedContent = formatCodeBlocks(message.answer);
 
     return (
       <div className="message-container">
-        <div className={`model-indicator ${model.toLowerCase()}`}>
-          {model}
+        <div className={`model-indicator ${message.model.toLowerCase()}`}>
+          {message.model}
         </div>
         <ReactMarkdown
           components={{
@@ -201,23 +274,23 @@ const Chat: React.FC<ChatProps> = ({ selectedAdvice, onNewAdvice }) => {
 
   return (
     <div className="chat">
-      <div className="chat-messages">
+      <div className="chat-messages" ref={chatMessagesRef}>
         {messages.length === 0 && !selectedAdvice ? (
           <div className="no-conversations">
             <p>Hola {user?.name}, estoy listo para ayudarte.</p> <p>¿En qué puedo asesorarte hoy?</p>
           </div>
         ) : (
           messages.map((message, index) => (
-            <div key={index} className="message">
+            <div key={index} className="message" ref={index === messages.length - 1 ? lastMessageRef : null}>
               <p className="user-message">{message.question}</p>
               <div className="ai-message">
-                {renderMessage(message.answer, message.model)}
+                {renderMessage(message)}
               </div>
             </div>
           ))
         )}
         {isLoading && (
-          <div className="message">
+          <div className="message" ref={loadingIndicatorRef}>
             <div className="ai-message">
               <div className="loading-indicator">
                 <div className="loading-indicator__dot"></div>
@@ -230,26 +303,47 @@ const Chat: React.FC<ChatProps> = ({ selectedAdvice, onNewAdvice }) => {
       </div>
       {error && <p className="error-message">{error}</p>}
       <form onSubmit={handleSubmit} className="chat-input">
-        <textarea
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder={selectedAdvice ? "Escribe tu mensaje..." : "Escribe aquí para iniciar una nueva asesoría..."}
-          disabled={isLoading}
-          rows={2}
-        />
-        <div className="chat-input-controls">
+        <div className="input-wrapper">
+          <label htmlFor="image-upload" className="image-upload-label">
+            <ImageIcon size={24} />
+          </label>
+          <input
+            id="image-upload"
+            type="file"
+            accept="image/*"
+            onChange={handleImageUpload}
+            ref={fileInputRef}
+            disabled={isLoading}
+            className="hidden-file-input"
+          />
+          <textarea
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder={selectedAdvice ? "Escribe tu mensaje..." : "Escribe aquí para iniciar una nueva asesoría..."}
+            disabled={isLoading}
+            rows={2}
+          />
           <select
             value={apiType}
             onChange={(e) => setApiType(e.target.value)}
             disabled={isLoading}
+            className="api-select"
           >
             <option value="openai">OpenAI</option>
             <option value="anthropic">Anthropic</option>
           </select>
-          <button type="submit" disabled={isLoading}>
-            {isLoading ? 'Enviando...' : 'Enviar'}
+          <button type="submit" disabled={isLoading} className="send-button">
+            <SendIcon size={24} />
           </button>
         </div>
+        {imageBase64 && (
+          <div className="image-preview-container">
+            <img src={`data:image/jpeg;base64,${imageBase64}`} alt="Preview" className="image-preview" />
+            <button type="button" onClick={clearImage} className="clear-image-button">
+              &#x2715;
+            </button>
+          </div>
+        )}
       </form>
     </div>
   );

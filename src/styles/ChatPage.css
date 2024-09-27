@@ -1,3 +1,4 @@
+/* Estilos generales */
 .chat-page {
   display: flex;
   flex-direction: column;
@@ -100,7 +101,7 @@
 
 .message {
   max-width: 70%;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
   width: 100%;
 }
 
@@ -116,17 +117,18 @@
   align-self: flex-start;
   background-color: #f8f9fa;
   border-radius: 20px 20px 20px 0;
-  padding: 10px 15px;
+  padding: 15px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  margin-top: 24px;
+  position: relative;
 }
 
-.ai-message p {
+.ai-message p, .ai-message ul, .ai-message ol {
   margin: 0 0 10px 0;
 }
 
 .ai-message ul, .ai-message ol {
-  margin: 0 0 10px 20px;
-  padding: 0;
+  padding-left: 20px;
 }
 
 .ai-message li {
@@ -145,7 +147,6 @@
   margin: 10px 0;
   overflow-x: auto;
   width: 100%;
-  max-width: 100%;
   box-sizing: border-box;
   white-space: pre-wrap;
   word-wrap: break-word;
@@ -183,59 +184,93 @@
 /* Estilos del área de entrada de chat */
 .chat-input {
   display: flex;
-  align-items: flex-end;
+  flex-direction: column;
   padding: 15px;
   background-color: #f0f0f0;
   border-radius: 8px;
   width: 100%;
 }
 
+.input-wrapper {
+  display: flex;
+  align-items: center;
+  background-color: white;
+  border-radius: 8px;
+  padding: 8px;
+}
+
 .chat-input textarea {
   flex: 1;
-  padding: 12px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
+  border: none;
+  outline: none;
+  resize: none;
+  padding: 8px;
   font-size: 16px;
-  resize: vertical;
-  min-height: 50px;
-  margin-right: 10px;
+  min-height: 40px;
 }
 
 .chat-input-controls {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.chat-input select,
+.image-upload-label,
+.send-button {
+  height: 40px;
+  border: none;
+  border-radius: 20px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s;
 }
 
 .chat-input select {
-  padding: 12px;
-  border: 1px solid #ccc;
-  border-radius: 20px;
-  background-color: white;
-  font-size: 16px;
-  height: 48px;
+  background-color: #f8f9fa;
+  color: #495057;
+  padding: 0 30px 0 10px;
   margin-right: 10px;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23495057' d='M10.293 3.293L6 7.586 1.707 3.293A1 1 0 00.293 4.707l5 5a1 1 0 001.414 0l5-5a1 1 0 10-1.414-1.414z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  width: auto;
+  min-width: 120px;
+  max-width: 200px;
 }
 
-.chat-input button {
-  padding: 12px 24px;
+.image-upload-label,
+.send-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  padding: 0;
+}
+
+.image-upload-label {
+  background-color: #f8f9fa;
+  color: #6c757d;
+}
+
+.send-button {
   background-color: #007bff;
   color: white;
-  border: none;
-  border-radius: 20px;
-  cursor: pointer;
-  font-size: 16px;
-  transition: background-color 0.3s;
-  white-space: nowrap;
-  height: 48px;
 }
 
-.chat-input button:hover {
+.send-button:hover {
   background-color: #0056b3;
 }
 
-.chat-input button:disabled {
+.send-button:disabled {
   background-color: #cccccc;
   cursor: not-allowed;
+}
+
+.hidden-file-input {
+  display: none;
 }
 
 /* Estilos de mensajes de error y carga */
@@ -245,7 +280,7 @@
   margin-bottom: 10px;
 }
 
-/* Nuevo indicador de carga */
+/* Indicador de carga */
 .loading-indicator {
   display: flex;
   justify-content: center;
@@ -262,22 +297,15 @@
   animation: bounce 1.4s infinite ease-in-out both;
 }
 
-.loading-indicator__dot:nth-child(1) {
-  animation-delay: -0.32s;
-}
-
-.loading-indicator__dot:nth-child(2) {
-  animation-delay: -0.16s;
-}
+.loading-indicator__dot:nth-child(1) { animation-delay: -0.32s; }
+.loading-indicator__dot:nth-child(2) { animation-delay: -0.16s; }
 
 @keyframes bounce {
-  0%, 80%, 100% { 
-    transform: scale(0);
-  } 40% { 
-    transform: scale(1.0);
-  }
+  0%, 80%, 100% { transform: scale(0); }
+  40% { transform: scale(1.0); }
 }
 
+/* Estilos de los bloques de código */
 .code-block-header {
   display: flex;
   justify-content: space-between;
@@ -305,12 +333,6 @@
   background-color: #6c757d;
 }
 
-.ai-message pre {
-  margin-top: 0;
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
-}
-
 /* Estilos para el marcador de posición "sin conversaciones" */
 .no-conversations {
   display: flex;
@@ -332,6 +354,74 @@
   max-width: 300px;
 }
 
+/* Estilos del indicador de modelo */
+.message-container {
+  position: relative;
+  width: 100%;
+  margin-top: 24px;
+}
+
+.model-indicator {
+  position: absolute;
+  top: -24px;
+  right: 0;
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: rgb(40, 21, 94);
+  font-weight: bold;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.model-indicator.openai { background-color: #10a37f; }
+.model-indicator.anthropic { background-color: #0000ff; }
+
+/* Estilos para la imagen del mensaje */
+.message-image {
+  max-width: 200px;
+  height: auto;
+  object-fit: contain;
+  margin: 10px 0;
+}
+
+/* Estilos para la previsualización de la imagen */
+.image-preview-container {
+  position: relative;
+  display: inline-block;
+  margin-top: 10px;
+}
+
+.image-preview {
+  max-width: 200px;
+  max-height: 200px;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+.clear-image-button {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background-color: #007bff;
+  border: 1px solid #0056b3;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  color: white;
+  transition: background-color 0.3s, color 0.3s;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.clear-image-button:hover {
+  background-color: #0056b3;
+}
+
 /* Estilos responsivos */
 @media (max-width: 1024px) {
   .chat-container {
@@ -340,6 +430,7 @@
   }
 }
 
+/* Estilos responsivos */
 @media (max-width: 768px) {
   .sidebar {
     position: fixed;
@@ -362,46 +453,34 @@
     margin-left: 265px;
   }
 
-  .chat-container {
-    width: 100%;
-    padding: 10px;
-  }
-
-  .chat-messages {
-    padding: 10px;
-  }
-
-  .message {
-    max-width: 90%;
-  }
-
   .chat-input {
     padding: 10px;
   }
 
-  .chat-input textarea,
-  .chat-input select,
-  .chat-input button {
+  .input-wrapper {
+    flex-wrap: wrap;
+  }
+
+  .chat-input textarea {
     width: 100%;
-    margin-right: 0;
     margin-bottom: 10px;
   }
 
   .chat-input-controls {
-    flex-direction: column;
+    width: 100%;
+    justify-content: space-between;
   }
 
-  .chat-input button {
-    margin-bottom: 0;
+  .chat-input select {
+    flex: 0 1 auto;
+    margin-right: 10px;
   }
-}
 
-/* Estilos para el botón de toggle del sidebar en el header */
-.sidebar-toggle {
-  display: none;
-}
+  .image-upload-label,
+  .send-button {
+    width: 40px;
+  }
 
-@media (max-width: 768px) {
   .sidebar-toggle {
     display: block;
     position: fixed;
@@ -422,64 +501,23 @@
   .sidebar-toggle:hover {
     background-color: #0056b3;
   }
+}
 
-  .chat-input {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .chat-input textarea {
-    margin-right: 0;
-    margin-bottom: 10px;
-  }
-
-  .chat-input-controls {
-    flex-direction: column;
-  }
-
+@media (max-width: 480px) {
   .chat-input select,
-  .chat-input button {
-    width: 100%;
-    margin-right: 0;
-    margin-bottom: 10px;
+  .image-upload-label,
+  .send-button {
+    height: 36px;
+    font-size: 12px;
   }
 
-  .chat-input button {
-    margin-bottom: 0;
+  .chat-input select {
+    min-width: 100px;
+    max-width: 150px;
   }
-}
 
-.message-container {
-  position: relative;
-  width: 100%;
-  margin-top: 24px; /* Añade espacio arriba para el indicador del modelo */
-}
-
-.model-indicator {
-  position: absolute;
-  top: -24px;
-  right: 0;
-  font-size: 12px;
-  padding: 2px 6px;
-  border-radius: 4px;
-  color: rgb(40, 21, 94);
-  font-weight: bold;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-}
-
-.model-indicator.openai {
-  background-color: #10a37f;
-}
-
-.model-indicator.anthropic {
-  background-color: #0000ff;
-}
-
-.ai-message {
-  position: relative;
-  background-color: #f8f9fa;
-  border-radius: 20px 20px 20px 0;
-  padding: 15px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-  margin-top: 24px; /* Añade espacio arriba para el indicador del modelo */
+  .image-upload-label,
+  .send-button {
+    width: 36px;
+  }
 }

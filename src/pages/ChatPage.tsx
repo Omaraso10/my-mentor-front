@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { getAdvisorys, deleteAdvice, Advice } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import Header from '../components/Header';
@@ -14,21 +14,15 @@ const ChatPage: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { user } = useAuth();
 
-  useEffect(() => {
-    if (user) {
-      loadAdvisories();
-    }
-  }, [user]);
-
-  const getGeneralConsultationAsesorId = (): number | null => {
+  const getGeneralConsultationAsesorId = useCallback((): number | null => {
     if (user && user.asesores) {
       const generalAsesor = user.asesores.find(asesor => asesor.professional.name === "Consulta General");
       return generalAsesor ? generalAsesor.id : null;
     }
     return null;
-  };
+  }, [user]);
 
-  const loadAdvisories = async () => {
+  const loadAdvisories = useCallback(async () => {
     setLoading(true);
     setError(null);
     const asesorId = getGeneralConsultationAsesorId();
@@ -48,7 +42,13 @@ const ChatPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [getGeneralConsultationAsesorId]);
+
+  useEffect(() => {
+    if (user) {
+      loadAdvisories();
+    }
+  }, [user, loadAdvisories]);
 
   const handleSelectAdvice = (advice: Advice) => {
     setSelectedAdvice(advice);
@@ -63,7 +63,7 @@ const ChatPage: React.FC = () => {
   const handleDeleteAdvice = async (adviceId: number) => {
     try {
       await deleteAdvice(adviceId);
-      setAdvisories(advisories.filter(advice => advice.id !== adviceId));
+      setAdvisories(prevAdvisories => prevAdvisories.filter(advice => advice.id !== adviceId));
       if (selectedAdvice && selectedAdvice.id === adviceId) {
         setSelectedAdvice(null);
       }
@@ -71,6 +71,22 @@ const ChatPage: React.FC = () => {
       console.error('Error deleting advice:', error);
       setError("Error al eliminar la asesoría");
     }
+  };
+
+  const handleNewOrUpdatedAdvice = (newAdvice: Advice) => {
+    setAdvisories(prevAdvisories => {
+      const existingIndex = prevAdvisories.findIndex(advice => advice.id === newAdvice.id);
+      if (existingIndex > -1) {
+        // Actualizar asesoría existente
+        const updatedAdvisories = [...prevAdvisories];
+        updatedAdvisories[existingIndex] = newAdvice;
+        return updatedAdvisories;
+      } else {
+        // Añadir nueva asesoría
+        return [newAdvice, ...prevAdvisories];
+      }
+    });
+    setSelectedAdvice(newAdvice);
   };
 
   const toggleSidebar = () => {
@@ -100,10 +116,7 @@ const ChatPage: React.FC = () => {
           ) : (
             <Chat 
               selectedAdvice={selectedAdvice}
-              onNewAdvice={(newAdvice) => {
-                setAdvisories(prev => [newAdvice, ...prev]);
-                setSelectedAdvice(newAdvice);
-              }}
+              onNewAdvice={handleNewOrUpdatedAdvice}
             />
           )}
         </div>
