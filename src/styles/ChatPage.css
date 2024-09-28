@@ -12,6 +12,72 @@
   overflow: hidden;
 }
 
+/* Estilos para el AlertDialog */
+.AlertDialog[data-state="open"],
+.AlertDialog[data-state="open"]::backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999999 !important; /* Valor extremadamente alto */
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.AlertDialogContent {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  max-width: 90%;
+  width: 400px;
+  z-index: 10000000 !important; /* Valor aún más alto */
+}
+
+.AlertDialogOverlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 9999998 !important;
+}
+
+.AlertDialogTitle {
+  font-size: 1.2em;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.AlertDialogDescription {
+  margin-bottom: 20px;
+}
+
+.AlertDialogFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.AlertDialogCancel,
+.AlertDialogAction {
+  padding: 8px 16px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+}
+
+.AlertDialogCancel {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+.AlertDialogAction {
+  background-color: #dc3545;
+  color: white;
+}
+
 /* Estilos de la barra lateral */
 .sidebar {
   width: 265px;
@@ -25,71 +91,41 @@
   transition: transform 0.3s ease-in-out;
 }
 
+.new-advice-buttons {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 0;
+}
+
 .new-advice-button {
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 12px 20px;
-  margin: 16px;
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  border-radius: 25px;
+  padding: 12px 16px;
+  margin: 4px 8px;
+  background-color: transparent;
+  color: #333;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 16px;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-  position: relative;
+  font-size: 14px;
+  font-weight: 400;
+  transition: all 0.2s ease;
+  text-align: left;
 }
 
 .new-advice-button:hover {
-  background-color: #45a049;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+  background-color: #f0f0f0;
 }
 
-.new-advice-button:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+.new-advice-button.selected {
+  background-color: #f0f0f0;
+  border-color: #d0d0d0;
+  font-weight: 600;
 }
 
 .new-advice-button svg {
   margin-right: 8px;
-}
-
-.new-advice-button::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 5px;
-  height: 5px;
-  background: rgba(255, 255, 255, 0.5);
-  opacity: 0;
-  border-radius: 100%;
-  transform: scale(1, 1) translate(-50%);
-  transform-origin: 50% 50%;
-}
-
-.new-advice-button:hover::after {
-  animation: ripple 1s ease-out;
-}
-
-@keyframes ripple {
-  0% {
-    transform: scale(0, 0);
-    opacity: 0.5;
-  }
-  20% {
-    transform: scale(25, 25);
-    opacity: 0.3;
-  }
-  100% {
-    opacity: 0;
-    transform: scale(40, 40);
-  }
+  color: #666;
 }
 
 .advice-list {
@@ -110,7 +146,6 @@
   margin: 0 auto;
 }
 
-/* Estilos del componente Chat */
 .chat {
   display: flex;
   flex-direction: column;
@@ -303,7 +338,6 @@
   margin-bottom: 10px;
 }
 
-/* Indicador de carga */
 .loading-indicator {
   display: flex;
   justify-content: center;
@@ -367,14 +401,29 @@
   color: #6c757d;
 }
 
-.no-conversations img {
-  margin-bottom: 20px;
-  opacity: 0.5;
-}
-
 .no-conversations p {
   font-size: 18px;
   max-width: 300px;
+}
+
+.asesor-name {
+  font-weight: bold;
+  font-size: 1.1em;
+  margin-bottom: 8px;
+}
+
+/* Estilos para el nombre del asesor en el chat principal */
+.chat-messages .asesor-name {
+  font-weight: bold;
+  font-size: 1.1em;
+  margin-bottom: 8px;
+}
+
+/* Estilos para el nombre del asesor en la lista de asesorías anteriores */
+.advice-list .asesor-name {
+  font-size: 0.75rem;
+  color: #666;
+  margin-top: 4px;
 }
 
 /* Estilos del indicador de modelo */
@@ -524,7 +573,6 @@
     background-color: #0056b3;
   }
 }
-
 
 @media (max-width: 480px) {
   .chat-input select,

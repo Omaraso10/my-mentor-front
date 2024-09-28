@@ -2,13 +2,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { createAdvice, updateAdvice, getAdviceDetails, AdviceResponse, Advice, AdviceDetail, AdviceRequest } from '../services/api';
+import { createAdvice, updateAdvice, getAdviceDetails, Advice, AdviceDetail, AdviceRequest } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import Swal from 'sweetalert2';
 import { ImageIcon, SendIcon } from 'lucide-react';
 
 interface ChatProps {
   selectedAdvice: Advice | null;
+  selectedAsesor: { id: number, name: string } | null;
   onNewAdvice: (newAdvice: Advice) => void;
 }
 
@@ -32,14 +33,13 @@ const languagePatterns: Record<string, LanguagePattern> = {
   },
 };
 
-const Chat: React.FC<ChatProps> = ({ selectedAdvice, onNewAdvice }) => {
+const Chat: React.FC<ChatProps> = ({ selectedAdvice, selectedAsesor, onNewAdvice }) => {
   const { user } = useAuth();
   const [messages, setMessages] = useState<AdviceDetail[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [apiType, setApiType] = useState<string>('anthropic');
-  const { getGeneralAsesorId } = useAuth();
   const [imageBase64, setImageBase64] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const loadingIndicatorRef = useRef<HTMLDivElement>(null);
@@ -87,41 +87,50 @@ const Chat: React.FC<ChatProps> = ({ selectedAdvice, onNewAdvice }) => {
     e.preventDefault();
     if (!input.trim() && !imageBase64) return;
     
-    const currentImageBase64 = imageBase64; // Guardar el valor actual de imageBase64
-    clearImage(); // Limpiar la imagen inmediatamente
+    const currentImageBase64 = imageBase64;
+    clearImage();
     
     setIsLoading(true);
     setError(null);
 
-    const asesorId = getGeneralAsesorId();
-    if (!asesorId) {
-      setError('No se pudo obtener el ID del asesor general.');
-      setIsLoading(false);
-      return;
-    }
     try {
-      const adviceData: AdviceRequest = {
-        user_professional_id: asesorId,
-        ask: input,
-        api_type: apiType,
-        image: currentImageBase64 || undefined
-      };
-  
-      let response: AdviceResponse;
-      if (!selectedAdvice) {
-        response = await createAdvice(adviceData);
-      } else {
-        response = await updateAdvice(selectedAdvice.id, adviceData);
-      }
+      let currentAdvice = selectedAdvice;
       
-      if (response.advice) {
-        const updatedAdvice = await getAdviceDetails(response.advice.id);
-        setMessages(updatedAdvice.advice.advisorys_details);
-        onNewAdvice(updatedAdvice.advice);
-        setInput('');
+      if (!currentAdvice && selectedAsesor) {
+        // Crear una nueva asesoría si no hay una seleccionada y hay un asesor seleccionado
+        const newAdviceRequest: AdviceRequest = {
+          user_professional_id: selectedAsesor.id,
+          ask: input,
+          api_type: apiType,
+          image: currentImageBase64 || undefined
+        };
+        
+        const response = await createAdvice(newAdviceRequest);
+        currentAdvice = {
+          ...response.advice,
+          asesorName: selectedAsesor.name,
+          asesorId: selectedAsesor.id
+        };
+        onNewAdvice(currentAdvice);
+      } else if (currentAdvice) {
+        // Actualizar la asesoría existente
+        const adviceData: AdviceRequest = {
+          user_professional_id: currentAdvice.asesorId!,
+          ask: input,
+          api_type: apiType,
+          image: currentImageBase64 || undefined
+        };
+        
+        const response = await updateAdvice(currentAdvice.id, adviceData);
+        currentAdvice = response.advice;
       } else {
-        throw new Error('No se recibió una respuesta válida del servidor');
+        throw new Error('No hay asesor seleccionado para crear una nueva asesoría');
       }
+
+      const updatedAdvice = await getAdviceDetails(currentAdvice.id);
+      setMessages(updatedAdvice.advice.advisorys_details);
+      onNewAdvice(updatedAdvice.advice);
+      setInput('');
     } catch (error) {
       console.error('Error sending message:', error);
       setError('Hubo un error al enviar tu mensaje. Por favor, intenta de nuevo.');
@@ -277,7 +286,11 @@ const Chat: React.FC<ChatProps> = ({ selectedAdvice, onNewAdvice }) => {
       <div className="chat-messages" ref={chatMessagesRef}>
         {messages.length === 0 && !selectedAdvice ? (
           <div className="no-conversations">
-            <p>Hola {user?.name}, estoy listo para ayudarte.</p> <p>¿En qué puedo asesorarte hoy?</p>
+            {selectedAsesor && (
+              <p className="asesor-name">{selectedAsesor.name}</p>
+            )}
+            <p>Hola {user?.name}, estoy listo para ayudarte.</p>
+            <p>¿En qué puedo asesorarte hoy?</p>
           </div>
         ) : (
           messages.map((message, index) => (
@@ -319,7 +332,7 @@ const Chat: React.FC<ChatProps> = ({ selectedAdvice, onNewAdvice }) => {
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder={selectedAdvice ? "Escribe tu mensaje..." : "Escribe aquí para iniciar una nueva asesoría..."}
+            placeholder="Escribe tu mensaje..."
             disabled={isLoading}
             rows={2}
           />

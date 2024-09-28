@@ -34,6 +34,19 @@ api.interceptors.response.use(
     };
 
     if (error.response) {
+      // Manejo especial para errores 404 en la ruta de asesorías
+      if (error.response?.status === 404 && originalRequest.url?.includes('/gpt/professional')) {
+        // Evita que el error se propague y se registre en la consola
+        console.log("No hay asesorías disponibles para este profesional.");
+        return Promise.resolve({
+          data: { advisorys: [], mensaje: "No hay asesorías disponibles." },
+          status: 200,
+          statusText: 'OK',
+          headers: error.response.headers,
+          config: originalRequest,
+        });
+      }
+
       if (error.response.status === 401 && !originalRequest._retry) {
         originalRequest._retry = true;
         handleLogout();
@@ -53,6 +66,7 @@ api.interceptors.response.use(
   }
 );
 
+// Interfaces (sin cambios)
 export interface AdviceRequest {
   user_professional_id: number;
   ask: string;
@@ -64,6 +78,8 @@ export interface Advice {
   id: number;
   description: string;
   advisorys_details: AdviceDetail[];
+  asesorName?: string;
+  asesorId?: number;
 }
 
 export interface AdviceDetail {
@@ -140,6 +156,7 @@ export interface UpdateUserRequest {
   enabled: boolean;
 }
 
+// Funciones de API
 export const getUsers = async (): Promise<UsersResponse> => {
   try {
     const response = await api.get<UsersResponse>('/users');
@@ -214,13 +231,13 @@ export const getAdvisorys = async (professionalId: number): Promise<AdviceListRe
     const response = await api.get<AdviceListResponse>(`/gpt/professional/${professionalId}`);
     return response.data;
   } catch (error) {
-    if (axios.isAxiosError(error)) {
-      if (error.response?.status === 404) {
-        return { advisorys: [], mensaje: "No hay asesorías disponibles." };
-      }
-      throw new Error(`Error al obtener asesorías: ${error.message}`);
+    // Este bloque no debería ejecutarse para errores 404 debido al interceptor
+    if (axios.isAxiosError(error) && error.response?.status === 404) {
+      return { advisorys: [], mensaje: "No hay asesorías disponibles." };
     }
-    throw error;
+    // Para otros tipos de errores, registra y devuelve un mensaje genérico
+    console.error("Error al obtener asesorías:", error);
+    return { advisorys: [], mensaje: "Error al obtener asesorías." };
   }
 };
 

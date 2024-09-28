@@ -4,46 +4,53 @@ import { useAuth } from '../context/AuthContext';
 import Header from '../components/Header';
 import AdviceList from '../components/AdviceList';
 import Chat from '../components/Chat';
-import { PlusCircle } from 'lucide-react';
+import { MessageSquare } from 'lucide-react';
 import '../styles/ChatPage.css';
 
 const ChatPage: React.FC = () => {
   const [advisories, setAdvisories] = useState<Advice[]>([]);
+  const [selectedAsesor, setSelectedAsesor] = useState<{id: number, name: string} | null>(null);
   const [selectedAdvice, setSelectedAdvice] = useState<Advice | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { user } = useAuth();
 
-  const getGeneralConsultationAsesorId = useCallback((): number | null => {
-    if (user && user.asesores) {
-      const generalAsesor = user.asesores.find(asesor => asesor.professional.name === "Consulta General");
-      return generalAsesor ? generalAsesor.id : null;
-    }
-    return null;
-  }, [user]);
-
   const loadAdvisories = useCallback(async () => {
     setLoading(true);
     setError(null);
-    const asesorId = getGeneralConsultationAsesorId();
-    if (asesorId === null) {
-      setError("No se encontró el asesor de Consulta General");
+  
+    if (!user || !user.asesores) {
+      setError("No se encontraron asesores asociados al usuario");
       setLoading(false);
       return;
     }
-
+  
     try {
-      const response = await getAdvisorys(asesorId);
-      setAdvisories(response.advisorys);
+      const allAdvisories = await Promise.all(
+        user.asesores.map(async (asesor) => {
+          const response = await getAdvisorys(asesor.id);
+          return response.advisorys.map(advice => ({
+            ...advice,
+            asesorName: asesor.professional.name,
+            asesorId: asesor.id
+          }));
+        })
+      );
+      
+      const flattenedAdvisories = allAdvisories.flat();
+      setAdvisories(flattenedAdvisories);
+  
+      if (flattenedAdvisories.length === 0) {
+        console.log("No se encontraron asesorías para ninguno de los asesores.");
+      }
     } catch (error) {
-      console.error('Error loading advisories:', error);
-      setError(error instanceof Error ? error.message : "Error desconocido al cargar las asesorías");
-      setAdvisories([]);
+      // Evita registrar errores en la consola aquí
+      setError("Error al cargar las asesorías. Por favor, intente nuevamente más tarde.");
     } finally {
       setLoading(false);
     }
-  }, [getGeneralConsultationAsesorId]);
+  }, [user]);
 
   useEffect(() => {
     if (user) {
@@ -51,13 +58,15 @@ const ChatPage: React.FC = () => {
     }
   }, [user, loadAdvisories]);
 
-  const handleSelectAdvice = (advice: Advice) => {
-    setSelectedAdvice(advice);
+  const handleSelectAsesor = (asesorId: number, asesorName: string) => {
+    setSelectedAsesor({ id: asesorId, name: asesorName });
+    setSelectedAdvice(null);
     setIsSidebarOpen(false);
   };
 
-  const handleNewAdvice = () => {
-    setSelectedAdvice(null);
+  const handleSelectAdvice = (advice: Advice) => {
+    setSelectedAdvice(advice);
+    setSelectedAsesor(null);
     setIsSidebarOpen(false);
   };
 
@@ -80,7 +89,10 @@ const ChatPage: React.FC = () => {
       if (existingIndex > -1) {
         // Actualizar asesoría existente
         const updatedAdvisories = [...prevAdvisories];
-        updatedAdvisories[existingIndex] = newAdvice;
+        updatedAdvisories[existingIndex] = {
+          ...updatedAdvisories[existingIndex],
+          ...newAdvice
+        };
         return updatedAdvisories;
       } else {
         // Añadir nueva asesoría
@@ -99,10 +111,18 @@ const ChatPage: React.FC = () => {
       <Header toggleSidebar={toggleSidebar} />
       <div className={`chat-content ${isSidebarOpen ? 'sidebar-open' : ''}`}>
         <div className={`sidebar ${isSidebarOpen ? 'open' : ''}`}>
-          <button className="new-advice-button" onClick={handleNewAdvice}>
-            <PlusCircle size={20} />
-            <span>Nueva Asesoría</span>
-          </button>
+          <div className="new-advice-buttons">
+            {user && user.asesores && user.asesores.map((asesor) => (
+              <button 
+                key={asesor.id}
+                className={`new-advice-button ${selectedAsesor?.id === asesor.id ? 'selected' : ''}`}
+                onClick={() => handleSelectAsesor(asesor.id, asesor.professional.name)}
+              >
+                <MessageSquare size={16} />
+                <span>{asesor.professional.name}</span>
+              </button>
+            ))}
+          </div>
           <AdviceList 
             advisories={advisories} 
             onSelectAdvice={handleSelectAdvice}
@@ -118,6 +138,7 @@ const ChatPage: React.FC = () => {
           ) : (
             <Chat 
               selectedAdvice={selectedAdvice}
+              selectedAsesor={selectedAsesor}
               onNewAdvice={handleNewOrUpdatedAdvice}
             />
           )}

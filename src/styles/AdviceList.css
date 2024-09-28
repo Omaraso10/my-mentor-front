@@ -47,14 +47,26 @@
   border-left: 4px solid #1890ff;
 }
 
-.advice-description {
+.advice-info {
+  display: flex;
+  flex-direction: column;
   flex-grow: 1;
   margin-right: 12px;
+  overflow: hidden;
+}
+
+.advice-description {
   font-size: 0.9rem;
   color: #333;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.asesor-name {
+  font-size: 0.75rem;
+  color: #666;
+  margin-top: 4px;
 }
 
 .delete-button {
@@ -77,5 +89,9 @@
 
   .advice-description {
     font-size: 0.85rem;
+  }
+
+  .asesor-name {
+    font-size: 0.75rem;
   }
 }

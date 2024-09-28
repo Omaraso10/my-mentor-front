@@ -13,6 +13,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import '../styles/AdviceList.css';
+import '../styles/ChatPage.css';
 
 interface AdviceListProps {
   advisories: Advice[];
@@ -37,7 +38,10 @@ const AdviceList: React.FC<AdviceListProps> = ({ advisories, onSelectAdvice, onD
               onClick={() => onSelectAdvice(advice)}
               className={`advice-item ${advice.id === selectedAdviceId ? 'selected' : ''}`}
             >
-              <span className="advice-description">{advice.description}</span>
+              <div className="advice-info">
+                <span className="advice-description">{advice.description || 'Nueva asesoría'}</span>
+                <span className="asesor-name" title="Nombre del asesor">{advice.asesorName}</span>
+              </div>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <button 
@@ -48,16 +52,16 @@ const AdviceList: React.FC<AdviceListProps> = ({ advisories, onSelectAdvice, onD
                     <Trash2 size={18} />
                   </button>
                 </AlertDialogTrigger>
-                <AlertDialogContent>
+                <AlertDialogContent className="AlertDialogContent">
                   <AlertDialogHeader>
-                    <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
-                    <AlertDialogDescription>
+                    <AlertDialogTitle className="AlertDialogTitle">¿Estás seguro?</AlertDialogTitle>
+                    <AlertDialogDescription className="AlertDialogDescription">
                       Esta acción no se puede deshacer. Esto eliminará permanentemente la asesoría.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                    <AlertDialogAction onClick={() => onDeleteAdvice(advice.id)}>
+                  <AlertDialogFooter className="AlertDialogFooter">
+                    <AlertDialogCancel className="AlertDialogCancel">Cancelar</AlertDialogCancel>
+                    <AlertDialogAction className="AlertDialogAction" onClick={() => onDeleteAdvice(advice.id)}>
                       Eliminar
                     </AlertDialogAction>
                   </AlertDialogFooter>
