@@ -44,8 +44,14 @@ const ChatPage: React.FC = () => {
       if (flattenedAdvisories.length === 0) {
         console.log("No se encontraron asesorías para ninguno de los asesores.");
       }
+
+      // Seleccionar "Consulta General" por defecto
+      const consultaGeneral = user.asesores.find(asesor => asesor.professional.name === "Consulta General");
+      if (consultaGeneral) {
+        setSelectedAsesor({ id: consultaGeneral.id, name: consultaGeneral.professional.name });
+      }
     } catch (error) {
-      // Evita registrar errores en la consola aquí
+      console.error('Error loading advisories:', error);
       setError("Error al cargar las asesorías. Por favor, intente nuevamente más tarde.");
     } finally {
       setLoading(false);
@@ -66,7 +72,7 @@ const ChatPage: React.FC = () => {
 
   const handleSelectAdvice = (advice: Advice) => {
     setSelectedAdvice(advice);
-    setSelectedAsesor(null);
+    setSelectedAsesor({ id: advice.asesorId!, name: advice.asesorName! });
     setIsSidebarOpen(false);
   };
 
