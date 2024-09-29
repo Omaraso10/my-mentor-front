@@ -45,6 +45,7 @@ const Chat: React.FC<ChatProps> = ({ selectedAdvice, selectedAsesor, onNewAdvice
   const loadingIndicatorRef = useRef<HTMLDivElement>(null);
   const lastMessageRef = useRef<HTMLDivElement>(null);
   const chatMessagesRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const scrollToLoadingIndicator = () => {
     setTimeout(() => {
@@ -82,6 +83,12 @@ const Chat: React.FC<ChatProps> = ({ selectedAdvice, selectedAsesor, onNewAdvice
     };
     loadAdviceDetails();
   }, [selectedAdvice]);
+
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.focus();
+    }
+  }, [selectedAdvice, selectedAsesor]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -139,6 +146,10 @@ const Chat: React.FC<ChatProps> = ({ selectedAdvice, selectedAsesor, onNewAdvice
       }
     } finally {
       setIsLoading(false);
+      // Volver a enfocar el textarea después de enviar el mensaje
+      if (textareaRef.current) {
+        textareaRef.current.focus();
+      }
     }
   };
   
@@ -330,6 +341,7 @@ const Chat: React.FC<ChatProps> = ({ selectedAdvice, selectedAsesor, onNewAdvice
             className="hidden-file-input"
           />
           <textarea
+            ref={textareaRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Escribe tu mensaje..."
