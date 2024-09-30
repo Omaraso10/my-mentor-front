@@ -99,20 +99,24 @@ const Chat: React.FC<ChatProps> = ({ selectedAdvice, selectedAsesor, onNewAdvice
     
     setIsLoading(true);
     setError(null);
-
+  
     try {
       let currentAdvice = selectedAdvice;
       
+      const adviceRequest: AdviceRequest = {
+        user_professional_id: currentAdvice?.asesorId || selectedAsesor?.id,
+        ask: input,
+        api_type: apiType,
+        image: currentImageBase64 || undefined
+      };
+  
+      if (!adviceRequest.user_professional_id) {
+        throw new Error('No se pudo determinar el ID del asesor');
+      }
+      
       if (!currentAdvice && selectedAsesor) {
-        // Crear una nueva asesoría si no hay una seleccionada y hay un asesor seleccionado
-        const newAdviceRequest: AdviceRequest = {
-          user_professional_id: selectedAsesor.id,
-          ask: input,
-          api_type: apiType,
-          image: currentImageBase64 || undefined
-        };
-        
-        const response = await createAdvice(newAdviceRequest);
+        // Crear una nueva asesoría
+        const response = await createAdvice(adviceRequest);
         currentAdvice = {
           ...response.advice,
           asesorName: selectedAsesor.name,
@@ -121,19 +125,12 @@ const Chat: React.FC<ChatProps> = ({ selectedAdvice, selectedAsesor, onNewAdvice
         onNewAdvice(currentAdvice);
       } else if (currentAdvice) {
         // Actualizar la asesoría existente
-        const adviceData: AdviceRequest = {
-          user_professional_id: currentAdvice.asesorId!,
-          ask: input,
-          api_type: apiType,
-          image: currentImageBase64 || undefined
-        };
-        
-        const response = await updateAdvice(currentAdvice.id, adviceData);
+        const response = await updateAdvice(currentAdvice.id, adviceRequest);
         currentAdvice = response.advice;
       } else {
         throw new Error('No hay asesor seleccionado para crear una nueva asesoría');
       }
-
+  
       const updatedAdvice = await getAdviceDetails(currentAdvice.id);
       setMessages(updatedAdvice.advice.advisorys_details);
       onNewAdvice(updatedAdvice.advice);
@@ -146,7 +143,6 @@ const Chat: React.FC<ChatProps> = ({ selectedAdvice, selectedAsesor, onNewAdvice
       }
     } finally {
       setIsLoading(false);
-      // Volver a enfocar el textarea después de enviar el mensaje
       if (textareaRef.current) {
         textareaRef.current.focus();
       }

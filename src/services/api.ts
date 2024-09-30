@@ -218,10 +218,15 @@ export const createAdvice = async (data: AdviceRequest): Promise<AdviceResponse>
 
 export const updateAdvice = async (id: number, data: AdviceRequest): Promise<AdviceResponse> => {
   try {
-    const response = await api.put<AdviceResponse>(`/gpt/professional/advice/${id}`, data);
+    const response = await api.put<AdviceResponse>(`/gpt/professional/advice/${id}`, {
+      user_professional_id: data.user_professional_id,
+      ask: data.ask,
+      api_type: data.api_type,
+      image: data.image
+    });
     return response.data;
   } catch (error) {
-    console.error('Error updating advice:', error);
+    console.error('Error al actualizar la asesoría:', error);
     throw error;
   }
 };
