@@ -103,16 +103,19 @@ const Chat: React.FC<ChatProps> = ({ selectedAdvice, selectedAsesor, onNewAdvice
     try {
       let currentAdvice = selectedAdvice;
       
+      // Asegurarse de que user_professional_id sea un número válido
+      const userProfessionalId = currentAdvice?.asesorId || selectedAsesor?.id;
+      
+      if (typeof userProfessionalId !== 'number') {
+        throw new Error('No se pudo determinar el ID del asesor');
+      }
+  
       const adviceRequest: AdviceRequest = {
-        user_professional_id: currentAdvice?.asesorId || selectedAsesor?.id,
+        user_professional_id: userProfessionalId,
         ask: input,
         api_type: apiType,
         image: currentImageBase64 || undefined
       };
-  
-      if (!adviceRequest.user_professional_id) {
-        throw new Error('No se pudo determinar el ID del asesor');
-      }
       
       if (!currentAdvice && selectedAsesor) {
         // Crear una nueva asesoría
