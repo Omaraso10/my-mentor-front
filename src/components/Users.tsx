@@ -6,6 +6,8 @@ import EditUserModal from './EditUserModal';
 import Swal from 'sweetalert2';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import { Trash2, Edit2, UserPlus } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const Users: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -79,61 +81,111 @@ const Users: React.FC = () => {
     }
   };
 
-  if (loading) return <div>Cargando...</div>;
+  if (loading) return (
+    <div className="flex justify-center items-center h-screen">
+      <div className="loading-indicator">
+        <div className="loading-indicator__dot"></div>
+        <div className="loading-indicator__dot"></div>
+        <div className="loading-indicator__dot"></div>
+      </div>
+    </div>
+  );
+
+  const UserCard = ({ user }: { user: User }) => (
+    <Card className="mb-4">
+      <CardHeader>
+        <CardTitle className="text-lg">{user.name} {user.last_name}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p><strong>Email:</strong> {user.email}</p>
+        <p><strong>Teléfono:</strong> {user.phone_number}</p>
+        <p><strong>Admin:</strong> {user.admin ? 'Sí' : 'No'}</p>
+        <p><strong>Habilitado:</strong> {user.enabled ? 'Sí' : 'No'}</p>
+        <div className="mt-4 flex justify-end space-x-2">
+          <Button 
+            variant="outline"
+            size="sm"
+            onClick={() => handleEditUser(user)}
+          >
+            <Edit2 className="h-4 w-4 mr-2" /> Editar
+          </Button>
+          <Button 
+            variant="destructive"
+            size="sm"
+            onClick={() => handleDeleteUser(user.uuid)}
+          >
+            <Trash2 className="h-4 w-4 mr-2" /> Eliminar
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6 text-center">Gestión de Usuarios</h1>
-      {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">{error}</div>}
-      <Button onClick={() => setIsCreateModalOpen(true)} className="mb-6">
-        Crear Usuario
+      <h1 className="text-3xl font-bold mb-6 text-center text-gray-800">Gestión de Usuarios</h1>
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+          <span className="block sm:inline">{error}</span>
+        </div>
+      )}
+      <Button 
+        onClick={() => setIsCreateModalOpen(true)} 
+        className="mb-6 bg-blue-500 hover:bg-blue-600 text-white w-full sm:w-auto"
+      >
+        <UserPlus className="mr-2 h-4 w-4" /> Crear Usuario
       </Button>
-      <div className="overflow-x-auto">
+      <div className="hidden md:block bg-white shadow-md rounded-lg overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>UUID</TableHead>
+              <TableHead className="w-[100px]">UUID</TableHead>
               <TableHead>Nombre</TableHead>
               <TableHead>Apellido</TableHead>
               <TableHead>Teléfono</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Admin</TableHead>
               <TableHead>Habilitado</TableHead>
-              <TableHead>Acciones</TableHead>
+              <TableHead className="text-right">Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {users.map((user) => (
-              <TableRow key={user.uuid}>
-                <TableCell>{user.uuid}</TableCell>
+              <TableRow key={user.uuid} className="hover:bg-gray-50">
+                <TableCell className="font-medium">{user.uuid.slice(0, 8)}...</TableCell>
                 <TableCell>{user.name}</TableCell>
                 <TableCell>{user.last_name}</TableCell>
                 <TableCell>{user.phone_number}</TableCell>
                 <TableCell>{user.email}</TableCell>
                 <TableCell>{user.admin ? 'Sí' : 'No'}</TableCell>
                 <TableCell>{user.enabled ? 'Sí' : 'No'}</TableCell>
-                <TableCell>
-                  <div className="flex space-x-2">
-                    <Button 
-                      variant="outline"
-                      onClick={() => handleEditUser(user)}
-                      aria-label="Editar usuario"
-                    >
-                      Editar
-                    </Button>
-                    <Button 
-                      variant="destructive"
-                      onClick={() => handleDeleteUser(user.uuid)}
-                      aria-label="Eliminar usuario"
-                    >
-                      Eliminar
-                    </Button>
-                  </div>
+                <TableCell className="text-right">
+                  <Button 
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleEditUser(user)}
+                    className="mr-2"
+                  >
+                    <Edit2 className="h-4 w-4" />
+                  </Button>
+                  <Button 
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleDeleteUser(user.uuid)}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
+      </div>
+      <div className="md:hidden">
+        {users.map((user) => (
+          <UserCard key={user.uuid} user={user} />
+        ))}
       </div>
       <CreateUserModal
         isOpen={isCreateModalOpen}

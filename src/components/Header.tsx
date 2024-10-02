@@ -39,6 +39,9 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
               {user?.admin && (
                 <li><Link to="/users" onClick={toggleMenu}>Usuarios</Link></li>
               )}
+              {user?.admin && (
+                <li><Link to="/advisors" onClick={toggleMenu}>Asesores</Link></li>
+              )}
               <li>
                 <button onClick={() => { handleLogout(); toggleMenu(); }} className="logout-button">
                   Cerrar Sesión

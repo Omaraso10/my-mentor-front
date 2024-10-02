@@ -156,6 +156,78 @@ export interface UpdateUserRequest {
   enabled: boolean;
 }
 
+export interface Area {
+  id: number;
+  name: string;
+}
+
+export interface AreasResponse {
+  areas: Area[];
+  mensaje: string;
+}
+
+export interface Advisor {
+  id: number;
+  name: string;
+  description: string;
+  area: Area;
+}
+
+export interface AdvisorsResponse {
+  profesiones: Advisor[];
+  mensaje: string;
+}
+
+export interface AdvisorResponse {
+  mensaje: string;
+  profesion: Advisor;
+}
+
+export interface CreateAdvisorRequest {
+  name: string;
+  description: string;
+  id_area: number;
+}
+
+export interface UpdateAdvisorResponse {
+  mensaje: string;
+  asesor?: Advisor;
+}
+
+export interface CreateAdvisorResponse {
+  asesor: Advisor;
+  mensaje: string;
+}
+
+export interface AdvisorsResponse {
+  content: Advisor[];
+  pageable: {
+    pageNumber: number;
+    pageSize: number;
+    sort: {
+      empty: boolean;
+      sorted: boolean;
+      unsorted: boolean;
+    };
+    offset: number;
+    paged: boolean;
+    unpaged: boolean;
+  };
+  last: boolean;
+  totalPages: number;
+  totalElements: number;
+  size: number;
+  number: number;
+  sort: {
+    empty: boolean;
+    sorted: boolean;
+    unsorted: boolean;
+  };
+  first: boolean;
+  numberOfElements: number;
+  empty: boolean;
+}
+
 // Funciones de API
 export const getUsers = async (): Promise<UsersResponse> => {
   try {
@@ -261,6 +333,77 @@ export const deleteAdvice = async (adviceId: number): Promise<void> => {
     await api.delete(`/gpt/professional/advice/${adviceId}`);
   } catch (error) {
     console.error('Error deleting advice:', error);
+    throw error;
+  }
+};
+
+export const getAdvisors = async (): Promise<AdvisorsResponse> => {
+  try {
+    const response = await api.get<AdvisorsResponse>('/professionals');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching advisors:', error);
+    throw error;
+  }
+};
+
+export const getAdvisorsPaginated = async (page: number = 0, size: number = 10): Promise<AdvisorsResponse> => {
+  try {
+    const response = await api.get<AdvisorsResponse>(`/professionals/page/${page}?size=${size}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching paginated advisors:', error);
+    throw error;
+  }
+};
+
+export const getAreas = async (): Promise<AreasResponse> => {
+  try {
+    const response = await api.get<AreasResponse>('/areas');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching areas:', error);
+    throw error;
+  }
+};
+
+export const getAdvisorById = async (id: number): Promise<AdvisorResponse> => {
+  try {
+    const response = await api.get<AdvisorResponse>(`/professional/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching advisor:', error);
+    throw error;
+  }
+};
+
+export const createAdvisor = async (advisorData: CreateAdvisorRequest): Promise<CreateAdvisorResponse> => {
+  try {
+    const response = await api.post<CreateAdvisorResponse>('/professional', advisorData);
+    return response.data;
+  } catch (error) {
+    console.error('Error creating advisor:', error);
+    throw error;
+  }
+};
+
+export const updateAdvisor = async (id: number, advisorData: CreateAdvisorRequest): Promise<UpdateAdvisorResponse> => {
+  try {
+    const response = await api.put<UpdateAdvisorResponse>(`/professional/${id}`, advisorData);
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      return error.response.data as UpdateAdvisorResponse;
+    }
+    throw error;
+  }
+};
+
+export const deleteAdvisor = async (id: number): Promise<void> => {
+  try {
+    await api.delete(`/professional/${id}`);
+  } catch (error) {
+    console.error('Error deleting advisor:', error);
     throw error;
   }
 };
