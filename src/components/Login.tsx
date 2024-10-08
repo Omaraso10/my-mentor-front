@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { LogIn } from 'lucide-react';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -56,37 +57,39 @@ const Login: React.FC = () => {
   };
 
   return (
-      <div className="login-container">
-        <form onSubmit={handleSubmit} className="login-form">
-          <h2>Iniciar Sesión</h2>
-          {loginError && <div className="error-message">{loginError}</div>}
-          <div className="form-group">
-            <label htmlFor="email">Email</label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              onBlur={() => validateEmail(email)}
-              required
-            />
-            {emailError && <div className="error-message">{emailError}</div>}
-          </div>
-          <div className="form-group">
-            <label htmlFor="password">Contraseña</label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              onBlur={() => validatePassword(password)}
-              required
-            />
-            {passwordError && <div className="error-message">{passwordError}</div>}
-          </div>
-          <button type="submit" className="login-button">Iniciar Sesión</button>
-        </form>
-      </div>
+    <div className="login-container">
+      <form onSubmit={handleSubmit} className="login-form">
+        <h2>Iniciar Sesión</h2>
+        {loginError && <div className="error-message">{loginError}</div>}
+        <div className="form-group">
+          <label htmlFor="email">Email</label>
+          <input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            onBlur={() => validateEmail(email)}
+            required
+          />
+          {emailError && <div className="error-message">{emailError}</div>}
+        </div>
+        <div className="form-group">
+          <label htmlFor="password">Contraseña</label>
+          <input
+            id="password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            onBlur={() => validatePassword(password)}
+            required
+          />
+          {passwordError && <div className="error-message">{passwordError}</div>}
+        </div>
+        <button type="submit" className="login-button">
+          <LogIn size={18} /> Log In
+        </button>
+      </form>
+    </div>
   );
 };
 

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import '../styles/Header.css';
+import { LogIn, LogOut, Home } from 'lucide-react';
 
 interface HeaderProps {
   toggleSidebar: () => void;
@@ -10,6 +11,7 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
   const { isAuthenticated, user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const handleLogout = () => {
@@ -20,6 +22,9 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
+
+  const isHomePage = location.pathname === '/';
+  const isLoginPage = location.pathname === '/login';
 
   return (
     <header className="app-header">
@@ -32,28 +37,38 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
       </button>
       <nav className={isMenuOpen ? 'open' : ''}>
         <ul>
-          <li><Link to="/" onClick={toggleMenu}>Inicio</Link></li>
+          {!isHomePage && (isLoginPage || !isAuthenticated) && (
+            <li>
+              <Link to="/" onClick={toggleMenu} className="nav-link">
+                <Home size={18} /> Home
+              </Link>
+            </li>
+          )}
           {isAuthenticated && (
             <>
-              <li><Link to="/chat" onClick={toggleMenu}>Chat</Link></li>
+              <li><Link to="/chat" onClick={toggleMenu} className="nav-link">Chat</Link></li>
               {user?.admin && (
-                <li><Link to="/users" onClick={toggleMenu}>Usuarios</Link></li>
+                <li><Link to="/users" onClick={toggleMenu} className="nav-link">Usuarios</Link></li>
               )}
               {user?.admin && (
-                <li><Link to="/advisors" onClick={toggleMenu}>Asesores</Link></li>
+                <li><Link to="/advisors" onClick={toggleMenu} className="nav-link">Asesores</Link></li>
               )}
               <li>
-                <button onClick={() => { handleLogout(); toggleMenu(); }} className="logout-button">
-                  Cerrar Sesión
-                </button>
+                <Link to="/" onClick={() => { handleLogout(); toggleMenu(); }} className="auth-link">
+                  <LogOut size={18} /> Log Out
+                </Link>
               </li>
               <li className="user-info">
                 Hola, {user?.name}
               </li>
             </>
           )}
-          {!isAuthenticated && (
-            <li><Link to="/login" onClick={toggleMenu}>Iniciar Sesión</Link></li>
+          {!isAuthenticated && !isLoginPage && (
+            <li>
+              <Link to="/login" onClick={toggleMenu} className="auth-link">
+                <LogIn size={18} /> Iniciar Sesión
+              </Link>
+            </li>
           )}
         </ul>
       </nav>
