@@ -3,10 +3,11 @@ import { useAuth } from '../context/AuthContext';
 import { getUsers, deleteUser, User } from '../services/api';
 import CreateUserModal from './CreateUserModal';
 import EditUserModal from './EditUserModal';
+import UserAdvisorsModal from './UserAdvisorsModal';
 import Swal from 'sweetalert2';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Trash2, Edit2, UserPlus } from 'lucide-react';
+import { Trash2, Edit2, UserPlus, Users as UsersIcon } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const Users: React.FC = () => {
@@ -16,7 +17,9 @@ const Users: React.FC = () => {
   const { user: currentUser } = useAuth();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isAdvisorsModalOpen, setIsAdvisorsModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [selectedUserForAdvisors, setSelectedUserForAdvisors] = useState<User | null>(null);
 
   useEffect(() => {
     fetchUsers();
@@ -81,6 +84,15 @@ const Users: React.FC = () => {
     }
   };
 
+  const handleOpenAdvisorsModal = (user: User) => {
+    setSelectedUserForAdvisors(user);
+    setIsAdvisorsModalOpen(true);
+  };
+
+  const handleUpdateUserAdvisors = (updatedUser: User) => {
+    setUsers(prev => prev.map(u => u.uuid === updatedUser.uuid ? updatedUser : u));
+  };
+
   if (loading) return (
     <div className="flex justify-center items-center h-screen">
       <div className="loading-indicator">
@@ -108,6 +120,13 @@ const Users: React.FC = () => {
             onClick={() => handleEditUser(user)}
           >
             <Edit2 className="h-4 w-4 mr-2" /> Editar
+          </Button>
+          <Button 
+            variant="outline"
+            size="sm"
+            onClick={() => handleOpenAdvisorsModal(user)}
+          >
+            <UsersIcon className="h-4 w-4 mr-2" /> Asesores
           </Button>
           <Button 
             variant="destructive"
@@ -171,6 +190,14 @@ const Users: React.FC = () => {
                   <Button 
                     variant="ghost"
                     size="sm"
+                    onClick={() => handleOpenAdvisorsModal(user)}
+                    className="mr-2"
+                  >
+                    <UsersIcon className="h-4 w-4" />
+                  </Button>
+                  <Button 
+                    variant="ghost"
+                    size="sm"
                     onClick={() => handleDeleteUser(user.uuid)}
                     className="text-red-500 hover:text-red-700"
                   >
@@ -198,6 +225,14 @@ const Users: React.FC = () => {
           onClose={() => setIsEditModalOpen(false)}
           onUpdateUser={handleUpdateUser}
           user={selectedUser}
+        />
+      )}
+      {selectedUserForAdvisors && (
+        <UserAdvisorsModal
+          isOpen={isAdvisorsModalOpen}
+          onClose={() => setIsAdvisorsModalOpen(false)}
+          user={selectedUserForAdvisors}
+          onUpdateUser={handleUpdateUserAdvisors}
         />
       )}
     </div>

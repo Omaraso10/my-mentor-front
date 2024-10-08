@@ -104,11 +104,12 @@ export interface Professional {
   id: number;
   name: string;
   description: string;
+  area: Area;
 }
 
 export interface Asesor {
   id: number;
-  advisorys: Advice[];
+  advisorys: Advice[] | null;
   professional: Professional;
 }
 
@@ -226,6 +227,11 @@ export interface AdvisorsResponse {
   first: boolean;
   numberOfElements: number;
   empty: boolean;
+}
+
+export interface AssociateAdvisorResponse {
+  asesor: Asesor;
+  mensaje: string;
 }
 
 // Funciones de API
@@ -404,6 +410,27 @@ export const deleteAdvisor = async (id: number): Promise<void> => {
     await api.delete(`/professional/${id}`);
   } catch (error) {
     console.error('Error deleting advisor:', error);
+    throw error;
+  }
+};
+
+// Función para asociar un asesor a un usuario
+export const associateAdvisorToUser = async (advisorId: number, userUuid: string): Promise<AssociateAdvisorResponse> => {
+  try {
+    const response = await api.post<AssociateAdvisorResponse>(`/professional/${advisorId}/uuid/${userUuid}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error associating advisor to user:', error);
+    throw error;
+  }
+};
+
+// Función para desasociar un asesor de un usuario
+export const disassociateAdvisorFromUser = async (mentorId: number): Promise<void> => {
+  try {
+    await api.delete(`/mentor/${mentorId}`);
+  } catch (error) {
+    console.error('Error disassociating advisor from user:', error);
     throw error;
   }
 };
