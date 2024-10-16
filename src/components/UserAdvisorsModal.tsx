@@ -18,13 +18,20 @@ const UserAdvisorsModal: React.FC<UserAdvisorsModalProps> = ({ isOpen, onClose, 
   const [error, setError] = useState('');
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-  const [pageSize] = useState(10); // Puedes ajustar esto según tus necesidades
+  const [pageSize] = useState(10);
+  const [associatedAdvisors, setAssociatedAdvisors] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     if (isOpen) {
       fetchAdvisors();
+      updateAssociatedAdvisors();
     }
-  }, [isOpen, currentPage]);
+  }, [isOpen, currentPage, user]);
+
+  const updateAssociatedAdvisors = () => {
+    const associatedIds = new Set(user.asesores.map(a => a.professional.id));
+    setAssociatedAdvisors(associatedIds);
+  };
 
   const fetchAdvisors = async () => {
     try {
@@ -42,16 +49,20 @@ const UserAdvisorsModal: React.FC<UserAdvisorsModalProps> = ({ isOpen, onClose, 
 
   const handleToggleAdvisor = async (advisor: Advisor) => {
     try {
-      const isAssociated = user.asesores.some(a => a.professional.id === advisor.id);
+      const isAssociated = associatedAdvisors.has(advisor.id);
+      let updatedUser: User;
+
       if (isAssociated) {
         const mentorId = user.asesores.find(a => a.professional.id === advisor.id)?.id;
         if (mentorId) {
           await disassociateAdvisorFromUser(mentorId);
-          const updatedUser = {
+          updatedUser = {
             ...user,
             asesores: user.asesores.filter(a => a.professional.id !== advisor.id)
           };
-          onUpdateUser(updatedUser);
+          associatedAdvisors.delete(advisor.id);
+        } else {
+          throw new Error('No se pudo encontrar el ID del mentor para desasociar');
         }
       } else {
         const response = await associateAdvisorToUser(advisor.id, user.uuid);
@@ -60,12 +71,15 @@ const UserAdvisorsModal: React.FC<UserAdvisorsModalProps> = ({ isOpen, onClose, 
           advisorys: null,
           professional: response.asesor.professional
         };
-        const updatedUser = {
+        updatedUser = {
           ...user,
           asesores: [...user.asesores, newAsesor]
         };
-        onUpdateUser(updatedUser);
+        associatedAdvisors.add(advisor.id);
       }
+
+      setAssociatedAdvisors(new Set(associatedAdvisors));
+      onUpdateUser(updatedUser);
     } catch (err) {
       console.error('Error toggling advisor:', err);
       setError('Error al actualizar los asesores. Por favor, intente nuevamente.');
@@ -100,7 +114,7 @@ const UserAdvisorsModal: React.FC<UserAdvisorsModalProps> = ({ isOpen, onClose, 
             <div key={advisor.id} className="flex items-center space-x-2 mb-2">
               <Checkbox
                 id={`advisor-${advisor.id}`}
-                checked={user.asesores.some(a => a.professional.id === advisor.id)}
+                checked={associatedAdvisors.has(advisor.id)}
                 onCheckedChange={() => handleToggleAdvisor(advisor)}
               />
               <label htmlFor={`advisor-${advisor.id}`}>{advisor.name}</label>
