@@ -28,12 +28,31 @@ export const login = async (email: string, password: string): Promise<{ loginRes
 
 export const logout = async () => {
   try {
-    // Si tu backend requiere una llamada para cerrar sesión, descomenta la siguiente línea
-    // await api.post('/logout');
-    
+    const token = localStorage.getItem('token');
+    if (token) {
+      await api.post('/logout', {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+    }
     localStorage.removeItem('token');
   } catch (error) {
     console.error('Error during logout:', error);
     throw error;
+  }
+};
+
+export const refreshToken = async (): Promise<string | null> => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No token found');
+    }
+    const response = await api.post<{ token: string }>('/refresh-token', {}, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return response.data.token;
+  } catch (error) {
+    console.error('Error refreshing token:', error);
+    return null;
   }
 };

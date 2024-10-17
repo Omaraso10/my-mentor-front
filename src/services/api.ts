@@ -1,6 +1,7 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
+import { refreshToken } from './auth';
 
-const API_URL = `${import.meta.env.VITE_API_URL}`
+const API_URL = `${import.meta.env.VITE_API_URL}`;
 
 interface ExtendedAxiosRequestConfig extends InternalAxiosRequestConfig {
   _retry?: boolean;
@@ -11,7 +12,7 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: Number(import.meta.env.TIME_OUT), 
+  timeout: Number(import.meta.env.TIME_OUT),
 });
 
 api.interceptors.request.use((config) => {
@@ -27,16 +28,25 @@ api.interceptors.response.use(
   async (error: AxiosError) => {
     const originalRequest = error.config as ExtendedAxiosRequestConfig;
 
-    const handleLogout = () => {
-      localStorage.removeItem('token');
-      localStorage.removeItem('userEmail');
-      window.location.href = '/login';
-    };
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+      try {
+        const newToken = await refreshToken();
+        if (newToken) {
+          localStorage.setItem('token', newToken);
+          api.defaults.headers['Authorization'] = `Bearer ${newToken}`;
+          return api(originalRequest);
+        }
+      } catch (refreshError) {
+        console.error('Error refreshing token:', refreshError);
+        handleLogout();
+        return Promise.reject(new Error('Sesión expirada. Por favor, inicie sesión nuevamente.'));
+      }
+    }
 
     if (error.response) {
       // Manejo especial para errores 404 en la ruta de asesorías
-      if (error.response?.status === 404 && originalRequest.url?.includes('/gpt/professional')) {
-        // Evita que el error se propague y se registre en la consola
+      if (error.response.status === 404 && originalRequest.url?.includes('/gpt/professional')) {
         console.log("No hay asesorías disponibles para este profesional.");
         return Promise.resolve({
           data: { advisorys: [], mensaje: "No hay asesorías disponibles." },
@@ -46,25 +56,23 @@ api.interceptors.response.use(
           config: originalRequest,
         });
       }
-
-      if (error.response.status === 401 && !originalRequest._retry) {
-        originalRequest._retry = true;
-        handleLogout();
-        return Promise.reject(new Error('Sesión expirada. Por favor, inicie sesión nuevamente.'));
-      }
     } else if (error.request) {
       console.error('No se recibió respuesta del servidor:', error.request);
-      handleLogout();
       return Promise.reject(new Error('No se pudo establecer conexión con el servidor. Por favor, intente más tarde.'));
     } else {
       console.error('Error en la configuración de la solicitud:', error.message);
-      handleLogout();
       return Promise.reject(new Error('Ocurrió un error al procesar su solicitud. Por favor, intente más tarde.'));
     }
 
     return Promise.reject(error);
   }
 );
+
+const handleLogout = () => {
+  localStorage.removeItem('token');
+  localStorage.removeItem('userEmail');
+  window.location.href = '/login';
+};
 
 // Interfaces (sin cambios)
 export interface AdviceRequest {
