@@ -42,7 +42,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const newToken = await refreshToken();
       if (newToken) {
-        console.log("New Token: " + newToken);
         localStorage.setItem('token', newToken);
         const email = localStorage.getItem('userEmail');
         if (email) {
